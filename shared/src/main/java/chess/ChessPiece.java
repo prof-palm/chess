@@ -67,6 +67,11 @@ public class ChessPiece {
             QueenMoves Queen_Moves = new QueenMoves();
             return Queen_Moves.pieceMoves(board, myPosition);
         }
+        else if(piece.getPieceType() == PieceType.KING){
+            KingMoves King_Moves = new KingMoves();
+            return King_Moves.pieceMoves(board, myPosition);
+        }
+
 
 
 
