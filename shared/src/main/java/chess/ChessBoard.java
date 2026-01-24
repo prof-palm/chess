@@ -15,7 +15,7 @@ public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -44,7 +44,8 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        for (int i=1; i<8; i++){
+
+        for (int i = 1; i < 9; i++){
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, PAWN));
             addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, PAWN));
 
@@ -61,10 +62,10 @@ public class ChessBoard {
         addPiece(new ChessPosition(1,6), new ChessPiece(ChessGame.TeamColor.WHITE, BISHOP));
         addPiece(new ChessPosition(8,3), new ChessPiece(ChessGame.TeamColor.BLACK, BISHOP));
         addPiece(new ChessPosition(8,6), new ChessPiece(ChessGame.TeamColor.BLACK, BISHOP));
+        addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE, KING));
+        addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.BLACK, KING));
         addPiece(new ChessPosition(1,4), new ChessPiece(ChessGame.TeamColor.WHITE, QUEEN));
         addPiece(new ChessPosition(8,4), new ChessPiece(ChessGame.TeamColor.BLACK, QUEEN));
-        addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE, KING));
-        addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.WHITE, KING));
 
 
         }
@@ -81,6 +82,13 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "squares=" + Arrays.toString(squares) +
+                '}';
     }
 }
 

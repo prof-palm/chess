@@ -3,6 +3,8 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
+
+//Literally just create instances of both my Bishops moves class and RookMoves class, and then add them together
 public class QueenMoves extends PieceMoveCalculator {
     Collection<ChessMove> q_m = new ArrayList<>() {
     };
