@@ -8,7 +8,9 @@ import java.util.Collection;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessGame {
+public class ChessGame implements Cloneable {
+    ChessBoard game_board = new ChessBoard();
+
 
     public ChessGame() {
 
@@ -46,7 +48,10 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> poss_moves = ChessPiece.pieceMoves(game_board, startPosition);
+
+
+
     }
 
     /**
@@ -66,6 +71,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+
         throw new RuntimeException("Not implemented");
     }
 
@@ -96,7 +102,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        game_board = board;
     }
 
     /**
@@ -105,6 +111,18 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return game_board;
+    }
+    public ChessGame clone(){
+        try{
+        ChessGame clone = (ChessGame) super.clone();
+        clone.setBoard(game_board);
+        return clone;
+
+
+        }
+        catch(CloneNotSupportedException e){
+            throw new RuntimeException(e);
+        }
     }
 }

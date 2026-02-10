@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
  public class BishopMoves extends PieceMoveCalculator{
-     Collection<ChessMove> b_m = new ArrayList<>() {
-     };
+     Collection<ChessMove> b_m = new ArrayList<>() {};
+
      public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
          int row = position.getRow();
          int col = position.getColumn();
