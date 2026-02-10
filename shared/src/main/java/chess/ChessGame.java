@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -49,6 +50,17 @@ public class ChessGame implements Cloneable {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> poss_moves = ChessPiece.pieceMoves(game_board, startPosition);
+        ChessGame clone = clone();
+        for(ChessMove move : poss_moves){
+            clone.makeMove(move);
+            if(! isInCheck(#enter color here) ){
+                poss_moves.add(move);
+            }
+
+
+        }
+        return poss_moves;
+
 
 
 
@@ -61,7 +73,12 @@ public class ChessGame implements Cloneable {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece s_piece  = game_board.getPiece(start);
+        ChessBoard.addPiece(start, null);
+        ChessBoard.addPiece(end, null);
+        ChessBoard.addPiece(end, s_piece);
     }
 
     /**
@@ -71,8 +88,15 @@ public class ChessGame implements Cloneable {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        //Iterate through all pieces to find the king
+        //Iterates through all pieces and their moves, if end position == startposition for king, return true
+        for(ChessPiece [] row : game_board.squares){
+            for(ChessPiece col : row){
 
-        throw new RuntimeException("Not implemented");
+            }
+
+        }
+
     }
 
     /**
