@@ -42,7 +42,7 @@ public class ChessPiece {
     /**
      * @return which type of chess piece this piece is
      */
-    public PieceType getPieceType() {
+    public  PieceType getPieceType() {
         return type;
     }
 
@@ -53,13 +53,13 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public  Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
+        if (this.getPieceType() == PieceType.BISHOP) {
            BishopMoves Bishop_Moves = new BishopMoves();
            return Bishop_Moves.pieceMoves(board, myPosition);
             }
-        else if(piece.getPieceType() == PieceType.ROOK){
+        else if(this.getPieceType() == PieceType.ROOK){
             RookMoves Rook_Moves = new RookMoves();
             return Rook_Moves.pieceMoves(board, myPosition);
         }

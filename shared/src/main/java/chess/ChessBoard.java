@@ -11,7 +11,7 @@ import static chess.ChessPiece.PieceType.*;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable {
 
     ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
@@ -24,7 +24,7 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
-    public static void addPiece(ChessPosition position, ChessPiece piece) {
+    public  void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
@@ -36,8 +36,16 @@ public class ChessBoard {
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
-    public ChessPiece getPiece(ChessPosition position) {
+    public  ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
+    }
+
+    public ChessPiece[][] getSquares() {
+        return squares;
+    }
+
+    public void setSquares(ChessPiece[][] squares) {
+        this.squares = squares;
     }
 
     /**
@@ -88,8 +96,30 @@ public class ChessBoard {
     @Override
     public String toString() {
         return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
+                "squares=" + Arrays.deepToString(squares) +
                 '}';
     }
+
+    public ChessBoard clone(){
+        try{
+            //this gives me a shallow copy
+            ChessBoard clone = (ChessBoard)super.clone();
+            ChessPiece [][] cloned_array = new ChessPiece[8][8];
+            for(int i = 1; i < 9; i++) {
+                for(int j = 1; j < 9; j++){
+                    cloned_array[i - 1][j - 1] = getPiece(new ChessPosition(i,j));
+                }
+            }
+            clone.setSquares(cloned_array);
+
+            return clone;
+
+
+        }
+        catch(CloneNotSupportedException e){
+            throw new RuntimeException(e);
+        }
+    }
 }
+
 
