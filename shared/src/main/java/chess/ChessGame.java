@@ -1,5 +1,6 @@
 package chess;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -18,6 +19,7 @@ public class ChessGame implements Cloneable {
 
 
     public ChessGame() {
+        game_board.resetBoard();
 
     }
 
@@ -61,10 +63,11 @@ public class ChessGame implements Cloneable {
         }
         else {
             Collection<ChessMove> poss_moves = piece.pieceMoves(game_board, startPosition);
+            ChessGame.TeamColor color = piece.getTeamColor();
             for (ChessMove move : poss_moves) {
                 ChessBoard clone = game_board.clone();
                 shadowMove(move, clone);
-                if (!isInCheck(teamTurn, clone)) {
+                if (!isInCheck(color, clone)) {
                     valid_moves.add(move);
                 }
 
@@ -86,19 +89,40 @@ public class ChessGame implements Cloneable {
         ChessPosition end = move.getEndPosition();
         Collection<ChessMove> v_moves = validMoves(start);
         ChessPiece s_piece = game_board.getPiece(start);
+        if(s_piece != null && s_piece.getTeamColor() != teamTurn){
+            throw new InvalidMoveException();
+        }
         if(v_moves == null){
             throw new InvalidMoveException();
         }
         else {
+            Collection<ChessMove> actual_move = new ArrayList<>();
             for (ChessMove v_move : v_moves) {
                 if (v_move.equals (move)) {
-                    game_board.addPiece(start, null);
-                    game_board.addPiece(end, null);
-                    game_board.addPiece(end, s_piece);
+                    actual_move.add(v_move);
+                    if(s_piece.getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 8 || end.getRow() == 1 )){
+                        ChessPiece.PieceType promo = move.getPromotionPiece();
+                        ChessPiece promo_piece = new ChessPiece(teamTurn, promo);
+                        game_board.addPiece(start, null);
+                        game_board.addPiece(end, null);
+                        game_board.addPiece(end, promo_piece);
+                    }
+                    else{
+                        game_board.addPiece(start, null);
+                        game_board.addPiece(end, null);
+                        game_board.addPiece(end, s_piece);
+                    }
+
                 }
 
+
             }
+            if(actual_move.isEmpty()){
+                throw new InvalidMoveException();
+            }
+
         }
+
         if(teamTurn == TeamColor.WHITE) {
             setTeamTurn(TeamColor.BLACK);
             }
@@ -134,7 +158,7 @@ public class ChessGame implements Cloneable {
 
     public boolean isInCheck(TeamColor teamColor, ChessBoard board) {
         Collection<ChessMove> enemy_mvs  = new ArrayList<>() ;
-        ChessPosition k_position = findKing(teamColor);
+        ChessPosition k_position = findKing(teamColor, board);
         for(int i = 1; i < 9; i++) {
             for(int j = 1; j < 9; j++){
                 if(board.getPiece(new ChessPosition(i,j)) == null || board.getPiece(new ChessPosition(i, j)).getTeamColor() == teamColor ){
@@ -149,33 +173,34 @@ public class ChessGame implements Cloneable {
 
         }
         for(ChessMove enemy_mv : enemy_mvs){
-             if(enemy_mv.getEndPosition() == k_position){
+             if(enemy_mv.getEndPosition().equals(k_position)){
                  return true;
              }
         }
         return false;
     }
-    public ChessPosition findKing(TeamColor teamColor){
+    public ChessPosition findKing(TeamColor teamColor) {
+        return findKing(teamColor, game_board);
+    }
 
+    public ChessPosition findKing(TeamColor teamColor, ChessBoard board){
         for(int i = 1; i < 9; i++) {
             for(int j = 1; j < 9; j++){
-                if(game_board.getPiece(new ChessPosition(i,j)) == null || game_board.getPiece(new ChessPosition(i, j)).getTeamColor() != teamColor ){
-                        doNothing();
-                    }
+                if(board.getPiece(new ChessPosition(i,j)) == null || board.getPiece(new ChessPosition(i, j)).getTeamColor() != teamColor ){
+                    doNothing();
+                }
                 else{
-                    ChessPiece p_type = game_board.getPiece(new ChessPosition(i, j));
+                    ChessPiece p_type = board.getPiece(new ChessPosition(i, j));
                     if(p_type.getPieceType() == ChessPiece.PieceType.KING){
                         return new ChessPosition(i, j);
 
-                        }
                     }
                 }
             }
+        }
 
         return null;
     }
-
-
 
     /**
      * Determines if the given team is in checkmate
@@ -184,14 +209,29 @@ public class ChessGame implements Cloneable {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition k_position = findKing(teamColor);
-        if(isInCheck(teamColor) && validMoves(k_position).isEmpty()){
+        Collection<ChessMove> all_poss_m = allValidMoves(teamColor);
+        if(isInCheck(teamColor) && all_poss_m.isEmpty()){
             return true;
         }
         return false;
     }
 
+    public Collection<ChessMove> allValidMoves(TeamColor teamColor){
+        Collection<ChessMove> all_poss_m = new ArrayList<>();
+        for(int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++){
+                if(game_board.getPiece(new ChessPosition(i,j)) == null || game_board.getPiece(new ChessPosition(i, j)).getTeamColor() != teamColor ){
+                    doNothing();
+                }
+                else{
+                    all_poss_m.addAll(validMoves(new ChessPosition(i,j)));
 
+                }
+            }
+
+        }
+        return all_poss_m;
+    }
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
@@ -200,8 +240,8 @@ public class ChessGame implements Cloneable {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        ChessPosition k_position = findKing(teamColor);
-        return !isInCheck(teamColor) && validMoves(k_position).isEmpty();
+        Collection<ChessMove> all_poss_m = allValidMoves(teamColor);
+        return !isInCheck(teamColor) && all_poss_m.isEmpty();
 
     }
 
