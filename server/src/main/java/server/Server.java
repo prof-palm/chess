@@ -1,6 +1,8 @@
 package server;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
+
 
 public class Server {
 
@@ -8,11 +10,16 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin.post("user",this::register);
 
-        // Register your endpoints and exception handlers here.
 
     }
+    private void register(Context ctx){
+        ctx.status(200);
+        ctx.result("{\"user\": \"bob\"}\n");
+        return;
 
+    }
     public int run(int desiredPort) {
         javalin.start(desiredPort);
         return javalin.port();
