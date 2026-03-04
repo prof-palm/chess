@@ -1,19 +1,30 @@
 package service;
 
 import dataaccess.AuthDataAccess;
+import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
+import model.AuthData;
+import model.UserData;
 import server.RegisterRequest;
 import server.RegisterResult;
 
-import static dataaccess.AuthDataAccess.*;
-import static dataaccess.UserDataAccess.*;
+import  dataaccess.AuthDataAccess.*;
+import  dataaccess.UserDataAccess.*;
+
 
 public class Service {
+
+    private UserDataAccess userData = new UserDataAccess();
+    private AuthDataAccess authData = new AuthDataAccess();
+    private GameDataAccess gameData = new GameDataAccess();
+
+
     public RegisterResult registerService(RegisterRequest request) {
-        if (UserDataAccess.getUserData(request.username()) == null) {
-            createUser(UserDataAccess.getUserDataBase(), request);
-            createAuth(AuthDataAccess.getAuthDataBase(), request);
-            return new RegisterResult();
+        if (userData.getUserData(request.username()) == null) {
+            userData.createUser(userData.getUserDataBase(), request);
+            authData.createAuth(authData.getAuthDataBase(), request);
+            AuthData data = authData.getAuthData(request.username());
+            return new RegisterResult(data.username(), data.authToken());
 
         } else {
             throw AlreadyTakenException;

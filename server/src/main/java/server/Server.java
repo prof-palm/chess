@@ -3,11 +3,14 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import service.Service;
 
 
 public class Server {
 
     private final Javalin javalin;
+
+    private final Service service = new Service();
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -25,14 +28,14 @@ public class Server {
         ctx.status(200);
         //handler
         Gson serializer = new Gson();
+
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
         //service
-        RegisterResult javaObject = registerService(request);
+        RegisterResult javaObject = service.registerService(request);
         //handler
-
+        String result = serializer.toJson(javaObject);
         //
-
-        ctx.result("{\"username\": \"bob\"\n, \"authToken\": \"string\"}");
+        ctx.result(result);
 
 
     }
