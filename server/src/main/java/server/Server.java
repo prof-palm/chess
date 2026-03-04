@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -22,9 +23,15 @@ public class Server {
     }
     private void register(Context ctx){
         ctx.status(200);
+        //handler
         Gson serializer = new Gson();
-        RegisterRequest request = serialzer.fromJson(ctx.body, RegisterRequest.class)
-        RegisterResult(request);
+        RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
+        //service
+        RegisterResult javaObject = registerService(request);
+        //handler
+
+        //
+
         ctx.result("{\"username\": \"bob\"\n, \"authToken\": \"string\"}");
 
 
