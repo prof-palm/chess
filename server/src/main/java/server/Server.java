@@ -1,12 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import service.AlreadyTakenException;
-import service.ExceptionMessage;
-import service.Service;
+import service.*;
 
 
 public class Server {
@@ -28,7 +25,6 @@ public class Server {
 
     }
     private void register(Context ctx) {
-        //handler
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
         try {
@@ -80,8 +76,63 @@ public class Server {
     }
 
     private void login(Context ctx){
-        ctx.status(200);
-        ctx.result("{}");
+        Gson serializer = new Gson();
+        LoginRequest request = serializer.fromJson(ctx.body(), LoginRequest.class);
+        try{
+            CheckRequest(request);
+            loginHelper(ctx, request, serializer);
+
+        }
+        catch(BadRequestException bde){
+            ctx.status(400);
+            ExceptionMessage message = new ExceptionMessage("Error: bad request");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+
+
+    }
+    public void CheckRequest(LoginRequest request) throws BadRequestException{
+        if(request.username() == null || request.password() == null){
+            throw new BadRequestException();
+        }
+
+    }
+
+    public void loginHelper(Context ctx, LoginRequest request, Gson serializer){
+        try{
+            LoginResult javaObject = service.loginService(request);
+
+            ctx.status(200);
+            String result = serializer.toJson(javaObject);
+            ctx.result(result);
+        }
+        catch (InvalidLoginException ex){
+            ctx.status(401);
+            ExceptionMessage message = new ExceptionMessage("Error: Unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+        catch(BadRequestException ex){
+            ctx.status(400);
+            ExceptionMessage message = new ExceptionMessage("Error: Unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+
+        catch(Exception ex){
+            ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: (description of error)");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+
+        }
+
+
     }
 
     private void logout(Context ctx){

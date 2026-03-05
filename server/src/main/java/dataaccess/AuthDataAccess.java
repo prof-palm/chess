@@ -1,4 +1,5 @@
 package dataaccess;
+import java.util.Objects;
 import java.util.UUID;
 import model.AuthData;
 import model.UserData;
@@ -20,16 +21,19 @@ public class AuthDataAccess {
     public HashMap<String, AuthData> getAuthDataBase(){
         return authData;
     }
+
     public AuthData getAuthData(String username) {
         return authData.get(username);
     }
 
 
-    public void createAuth(HashMap<String, AuthData> authData, RegisterRequest request) {
+    public void createAuth(HashMap<String, AuthData> authData, String username) {
         String authToken = generateToken();
-        authData.put(request.username(), new AuthData(authToken, request.username()));
+        authData.put(username, new AuthData(authToken, username));
 
 
     }
+
+
 
 }

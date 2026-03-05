@@ -4,6 +4,7 @@ import model.UserData;
 import server.RegisterRequest;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class UserDataAccess {
 
@@ -28,7 +29,9 @@ public class UserDataAccess {
         userData.put(request.username(), new UserData(request.username(), request.password(), request.email()));
     }
 
-//    public static void removeUserData(HashMap<String, List<String>> userData, LogoutRequest request){
+
+
+    //    public static void removeUserData(HashMap<String, List<String>> userData, LogoutRequest request){
 //        userData.remove(request.username);
 //    }
 

@@ -4,12 +4,7 @@ import dataaccess.AuthDataAccess;
 import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
 import model.AuthData;
-import model.UserData;
-import server.RegisterRequest;
-import server.RegisterResult;
-
-import  dataaccess.AuthDataAccess.*;
-import  dataaccess.UserDataAccess.*;
+import server.*;
 
 
 public class Service {
@@ -22,7 +17,7 @@ public class Service {
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
         if (userData.getUserData(request.username()) == null) {
             userData.createUser(userData.getUserDataBase(), request);
-            authData.createAuth(authData.getAuthDataBase(), request);
+            authData.createAuth(authData.getAuthDataBase(), request.username());
             AuthData data = authData.getAuthData(request.username());
             return new RegisterResult(data.username(), data.authToken());
 
@@ -33,6 +28,26 @@ public class Service {
 
 
     }
+    //throws User not Found exception
+    //throws Unauthorized exception
+    public LoginResult loginService(LoginRequest request) throws BadRequestException, InvalidLoginException {
+        if(!userData.getUserDataBase().containsKey(request.username())){
+            throw new InvalidLoginException();
+        }
+        else if (!(userData.getUserData(request.username()).password()).equals(request.password()) ){
+            throw new InvalidLoginException();
+        }
+        else{
+            authData.createAuth(authData.getAuthDataBase(), request.username());
+            AuthData data = authData.getAuthData(request.username());
+            return new LoginResult(data.username(), data.authToken());
+
+
+        }
+    }
+
+
+
 
 }
     /*public LoginResult login(LoginRequest loginRequest) {
