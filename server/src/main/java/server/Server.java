@@ -1,10 +1,11 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import service.AlreadyTaken;
 import service.AlreadyTakenException;
+import service.ExceptionMessage;
 import service.Service;
 
 
@@ -26,12 +27,23 @@ public class Server {
 
 
     }
-    private void register(Context ctx){
+    private void register(Context ctx) {
         //handler
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
-        //service
+        try {
+            CheckRequest(request);
+            registerHelper(ctx, request, serializer);
+        } catch (BadRequestException bde) {
+            ctx.status(400);
+            ExceptionMessage message = new ExceptionMessage("Error: bad request");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+        }
+    }
 
+
+    public void registerHelper(Context ctx, RegisterRequest request, Gson serializer){
         try{
         RegisterResult javaObject = service.registerService(request);
 
@@ -41,15 +53,29 @@ public class Server {
         }
         catch (AlreadyTakenException ex){
             ctx.status(403);
-            AlreadyTaken message = new AlreadyTaken("Error username already taken");
+            ExceptionMessage message = new ExceptionMessage("Error: already taken");
             String json = serializer.toJson(message);
             ctx.result(json);
 
         }
 
+        catch(Exception ex){
+            ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: (description of error)");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+
+        }
+    }
 
 
 
+
+    public void CheckRequest(RegisterRequest request) throws BadRequestException{
+        if(request.username() == null || request.password() == null || request.email() == null){
+            throw new BadRequestException();
+        }
 
     }
 
