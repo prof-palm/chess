@@ -29,7 +29,7 @@ public class AuthDataAccess {
 
     public void createAuth(HashMap<String, AuthData> authData, String username) {
         String authToken = generateToken();
-        authData.put(username, new AuthData(authToken, username));
+        authData.put(authToken, new AuthData(authToken, username));
 
 
     }

@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import com.sun.net.httpserver.Headers;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.*;
@@ -108,7 +109,7 @@ public class Server {
             String result = serializer.toJson(javaObject);
             ctx.result(result);
         }
-        catch (InvalidLoginException ex){
+        catch (UnAuthorizedException ex){
             ctx.status(401);
             ExceptionMessage message = new ExceptionMessage("Error: Unauthorized");
             String json = serializer.toJson(message);
@@ -136,8 +137,24 @@ public class Server {
     }
 
     private void logout(Context ctx){
-        ctx.status(200);
-        ctx.result("{}");
+        String authToken = ctx.header("authorization");
+        try{
+            service.logoutService(authToken);
+            ctx.status(200);
+
+        }
+        catch(UnAuthorizedException ex){
+            ctx.status(401);
+            Gson serializer = new Gson();
+            ExceptionMessage message = new ExceptionMessage("Error: unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+        catch(Exception ex){
+            ctx.status(500);
+        }
+
 
     }
     private void listGames(Context ctx){

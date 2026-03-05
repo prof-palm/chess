@@ -30,12 +30,12 @@ public class Service {
     }
     //throws User not Found exception
     //throws Unauthorized exception
-    public LoginResult loginService(LoginRequest request) throws BadRequestException, InvalidLoginException {
+    public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException {
         if(!userData.getUserDataBase().containsKey(request.username())){
-            throw new InvalidLoginException();
+            throw new UnAuthorizedException();
         }
         else if (!(userData.getUserData(request.username()).password()).equals(request.password()) ){
-            throw new InvalidLoginException();
+            throw new UnAuthorizedException();
         }
         else{
             authData.createAuth(authData.getAuthDataBase(), request.username());
@@ -44,6 +44,20 @@ public class Service {
 
 
         }
+    }
+    public void logoutService(String authToken)throws UnAuthorizedException{
+        if(!authData.getAuthDataBase().containsKey(authToken)){
+            throw new UnAuthorizedException();
+
+        }
+        else{
+            authData.getAuthDataBase().remove(authToken);
+
+
+
+        }
+
+
     }
 
 
