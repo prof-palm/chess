@@ -14,21 +14,18 @@ public class AuthDataAccess {
     public AuthDataAccess() {
         authData = new HashMap<>();
     }
-    public  String generateToken() {
-        return UUID.randomUUID().toString();
-    }
+
 
     public HashMap<String, AuthData> getAuthDataBase(){
         return authData;
     }
 
-    public AuthData getAuthData(String username) {
-        return authData.get(username);
+    public AuthData getAuthData(String authToken) {
+        return authData.get(authToken);
     }
 
 
-    public void createAuth(HashMap<String, AuthData> authData, String username) {
-        String authToken = generateToken();
+    public void createAuth(HashMap<String, AuthData> authData, String username, String authToken) {
         authData.put(authToken, new AuthData(authToken, username));
 
 

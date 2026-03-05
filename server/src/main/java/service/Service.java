@@ -6,6 +6,8 @@ import dataaccess.UserDataAccess;
 import model.AuthData;
 import server.*;
 
+import java.util.UUID;
+
 
 public class Service {
 
@@ -17,8 +19,9 @@ public class Service {
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
         if (userData.getUserData(request.username()) == null) {
             userData.createUser(userData.getUserDataBase(), request);
-            authData.createAuth(authData.getAuthDataBase(), request.username());
-            AuthData data = authData.getAuthData(request.username());
+            String authToken = generateToken();
+            authData.createAuth(authData.getAuthDataBase(), request.username(), authToken);
+            AuthData data = authData.getAuthData(authToken);
             return new RegisterResult(data.username(), data.authToken());
 
         } else {
@@ -27,6 +30,9 @@ public class Service {
         }
 
 
+    }
+    public  String generateToken() {
+        return UUID.randomUUID().toString();
     }
     //throws User not Found exception
     //throws Unauthorized exception
@@ -38,8 +44,9 @@ public class Service {
             throw new UnAuthorizedException();
         }
         else{
-            authData.createAuth(authData.getAuthDataBase(), request.username());
-            AuthData data = authData.getAuthData(request.username());
+            String authToken = generateToken();
+            authData.createAuth(authData.getAuthDataBase(), request.username(), authToken);
+            AuthData data = authData.getAuthData(authToken);
             return new LoginResult(data.username(), data.authToken());
 
 
