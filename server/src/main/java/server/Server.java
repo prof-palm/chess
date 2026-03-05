@@ -3,6 +3,8 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import service.AlreadyTaken;
+import service.AlreadyTakenException;
 import service.Service;
 
 
@@ -25,17 +27,28 @@ public class Server {
 
     }
     private void register(Context ctx){
-        ctx.status(200);
         //handler
         Gson serializer = new Gson();
-
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
         //service
+
+        try{
         RegisterResult javaObject = service.registerService(request);
-        //handler
-        String result = serializer.toJson(javaObject);
-        //
-        ctx.result(result);
+
+            ctx.status(200);
+            String result = serializer.toJson(javaObject);
+            ctx.result(result);
+        }
+        catch (AlreadyTakenException ex){
+            ctx.status(403);
+            AlreadyTaken message = new AlreadyTaken("Error username already taken");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+
+
+
 
 
     }

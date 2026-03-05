@@ -19,7 +19,7 @@ public class Service {
     private GameDataAccess gameData = new GameDataAccess();
 
 
-    public RegisterResult registerService(RegisterRequest request) {
+    public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
         if (userData.getUserData(request.username()) == null) {
             userData.createUser(userData.getUserDataBase(), request);
             authData.createAuth(authData.getAuthDataBase(), request);
@@ -27,10 +27,9 @@ public class Service {
             return new RegisterResult(data.username(), data.authToken());
 
         } else {
-            throw AlreadyTakenException;
+            throw new AlreadyTakenException();
 
         }
-    return null;
 
     }
 
