@@ -18,6 +18,7 @@ public class UserDataAccess {
     public  HashMap<String, UserData> getUserDataBase(){
         return userData;
     }
+    //all interactions with database happen here
 
 
     public  UserData getUserData(String username) {
@@ -27,6 +28,10 @@ public class UserDataAccess {
 
     public void createUser(HashMap<String, UserData> userData, RegisterRequest request) {
         userData.put(request.username(), new UserData(request.username(), request.password(), request.email()));
+    }
+    public void clear(){
+        userData.clear();
+
     }
 
 

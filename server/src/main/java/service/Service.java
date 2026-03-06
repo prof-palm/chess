@@ -4,8 +4,12 @@ import dataaccess.AuthDataAccess;
 import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
 import model.AuthData;
+import model.GameData;
 import server.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -15,7 +19,9 @@ public class Service {
     private AuthDataAccess authData = new AuthDataAccess();
     private GameDataAccess gameData = new GameDataAccess();
 
-
+    public  String generateToken() {
+        return UUID.randomUUID().toString();
+    }
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
         if (userData.getUserData(request.username()) == null) {
             userData.createUser(userData.getUserDataBase(), request);
@@ -31,9 +37,7 @@ public class Service {
 
 
     }
-    public  String generateToken() {
-        return UUID.randomUUID().toString();
-    }
+
     //throws User not Found exception
     //throws Unauthorized exception
     public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException {
@@ -64,6 +68,28 @@ public class Service {
 
         }
 
+
+    }
+    public ArrayList<GameData> listGamesService(String authToken)throws UnAuthorizedException{
+        //method getAuth, function below should just be included in authDataAccess
+        if(!authData.getAuthDataBase().containsKey(authToken)){
+            throw new UnAuthorizedException();
+
+        }
+        else{
+            ArrayList<GameData> result = new ArrayList<>();
+            for(GameData value : (gameData.getGameDataBase()).values()){
+                result.add(value);
+            }
+            return result;
+
+
+        }
+    }
+    public void clearService(){
+        gameData.clear();
+        userData.clear();
+        authData.clear();
 
     }
 

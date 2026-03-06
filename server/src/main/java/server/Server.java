@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import model.GameData;
 import service.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Server {
@@ -158,10 +162,36 @@ public class Server {
 
     }
     private void listGames(Context ctx){
-        ctx.status(200);
-        ctx.result("{}");
+        String authToken = ctx.header("authorization");
+        Gson serializer = new Gson();
+        try{
+            ctx.status(200);
+            ArrayList<GameData> listGames = service.listGamesService(authToken);
+            ListGamesResult result = new ListGamesResult(listGames);
+            String json = serializer.toJson(result);
+            ctx.result(json);
+
+
+        }
+        catch(UnAuthorizedException ex){
+            ctx.status(401);
+            ExceptionMessage message = new ExceptionMessage("Error: unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+        catch(Exception ex){
+            ctx.status(500);
+        }
+
 
     }
+
+
+
+
+
+
     private void createGame(Context ctx){
         ctx.status(200);
         ctx.result("{}");
@@ -173,6 +203,8 @@ public class Server {
     }
     private void clear(Context ctx){
         ctx.status(200);
+        service.clearService();
+
         ctx.result("{}");
     }
 
@@ -186,3 +218,4 @@ public class Server {
         javalin.stop();
     }
 }
+

@@ -30,6 +30,9 @@ public class AuthDataAccess {
 
 
     }
+    public void clear(){
+        authData.clear();
+    }
 
 
 
