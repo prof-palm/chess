@@ -92,6 +92,22 @@ public class Service {
         authData.clear();
 
     }
+    public CreateGameResult createGameService(String authToken, CreateGameRequest request)throws UnAuthorizedException{
+        if(!authData.getAuthDataBase().containsKey(authToken)){
+            throw new UnAuthorizedException();
+
+        }
+        else{
+            Integer gameID = gameData.createGame(request.gameName());
+            return new CreateGameResult(gameID);
+
+
+
+
+
+
+        }
+    }
 
 
 

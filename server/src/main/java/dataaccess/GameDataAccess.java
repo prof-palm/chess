@@ -1,6 +1,7 @@
 
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 
@@ -24,6 +25,19 @@ public class GameDataAccess {
     }
     public Collection<GameData> values(){
         return gameData.values();
+    }
+
+    public GameData getGame(Integer gameID){
+        return gameData.get(gameID);
+
+    }
+    public Integer createGame(String gameName){
+        Integer gameID = randomID();
+        gameData.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame()));
+        return gameID;
+    }
+    public Integer randomID(){
+        return (int)(Math.random() * 9000) + 1000;
     }
 
 

@@ -187,14 +187,47 @@ public class Server {
 
     }
 
-
-
-
-
-
     private void createGame(Context ctx){
-        ctx.status(200);
-        ctx.result("{}");
+        String authToken = ctx.header("authorization");
+        Gson serializer = new Gson();
+        CreateGameRequest request = serializer.fromJson(ctx.body(), CreateGameRequest.class);
+        try {
+            CheckRequest(request);
+            createGameHelper(ctx, request, serializer, authToken);
+        } catch (BadRequestException bde) {
+            ctx.status(400);
+            ExceptionMessage message = new ExceptionMessage("Error: bad request");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+        }
+    }
+
+    public void createGameHelper(Context ctx, CreateGameRequest request, Gson serializer, String authToken){
+        try{
+            ctx.status(200);
+            CreateGameResult result = service.createGameService(authToken, request);
+            String json = serializer.toJson(result);
+            ctx.result(json);
+
+
+        }
+        catch(UnAuthorizedException ex){
+            ctx.status(401);
+            ExceptionMessage message = new ExceptionMessage("Error: unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+        catch(Exception ex){
+            ctx.status(500);
+        }
+
+    }
+    public void CheckRequest(CreateGameRequest request) throws BadRequestException{
+        if(request.gameName()==null){
+            throw new BadRequestException();
+        }
+
     }
 
     private void joinGame(Context ctx){
