@@ -108,11 +108,34 @@ public class Service {
 
         }
     }
+    public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException {
+        if (!authData.getAuthDataBase().containsKey(authToken)) {
+            throw new UnAuthorizedException();
 
+        } else {
+            if (gameData.getGame(request.gameID()) == null) {
+                throw new BadRequestException();
+            }
+            else if(request.playerColor().equals("WHITE") && gameData.getGame(request.gameID()).whiteUsername() != null) {
+                throw new AlreadyTakenException();
 
+            }
+            else if(request.playerColor().equals("BLACK") && gameData.getGame(request.gameID()).blackUsername() != null){
+                throw new AlreadyTakenException();
+            }
+            else{
+                String username = authData.getAuthData(authToken).username();
+                gameData.updateGame(request, username);
 
+            }
 
+        }
+    }
 }
+
+
+
+
     /*public LoginResult login(LoginRequest loginRequest) {
 
     }

@@ -231,9 +231,57 @@ public class Server {
     }
 
     private void joinGame(Context ctx){
-        ctx.status(200);
-        ctx.result("{}");
+        String authToken = ctx.header("authorization");
+        Gson serializer = new Gson();
+        JoinGameRequest request = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+        try {
+            CheckRequest(request);
+            joinGameHelper(ctx, request, serializer, authToken);
+        } catch (BadRequestException bde) {
+            ctx.status(400);
+            ExceptionMessage message = new ExceptionMessage("Error: bad request");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+        }
     }
+
+    public void joinGameHelper(Context ctx, JoinGameRequest request, Gson serializer, String authToken){
+        try{
+            ctx.status(200);
+            service.joinGameService(authToken, request);
+
+
+        }
+        catch(AlreadyTakenException ate){
+            ctx.status(403);
+            ExceptionMessage message = new ExceptionMessage("Error: already taken");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+        }
+        catch(UnAuthorizedException ex){
+            ctx.status(401);
+            ExceptionMessage message = new ExceptionMessage("Error: unauthorized");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
+        }
+        catch(Exception ex){
+            ctx.status(500);
+        }
+
+    }
+    public void CheckRequest(JoinGameRequest request) throws BadRequestException{
+        if(request.playerColor() == null || request.gameID() == null || !checkValidColor(request)){
+            throw new BadRequestException();
+        }
+
+    }
+    public boolean checkValidColor(JoinGameRequest request){
+        return request.playerColor().equals("WHITE") || request.playerColor().equals("BLACK");
+    }
+
+
+
     private void clear(Context ctx){
         ctx.status(200);
         service.clearService();
