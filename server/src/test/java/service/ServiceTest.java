@@ -1,10 +1,13 @@
 package service;
 
+import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import server.*;
+
+import java.util.ArrayList;
 
 class ServiceTest {
 
@@ -92,14 +95,35 @@ class ServiceTest {
     }
 
     @Test
-    void listGamesService() throws AlreadyTakenException {
+    void listGamesServiceSuccess() throws AlreadyTakenException, UnAuthorizedException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
+        ArrayList<GameData> listOfGames = service.listGamesService(result.authToken());
+        Assertions.assertEquals(0, listOfGames.size());
+
+
+    }
+    @Test
+    void listGamesServiceFail() throws AlreadyTakenException {
+        RegisterRequest request = new RegisterRequest("water", "water", "water");
+        service.registerService(request);
+        Assertions.assertThrows(UnAuthorizedException.class, () ->
+                service.listGamesService("result.authToken()"));
+
 
     }
 
+
+
     @Test
-    void clearServiceSuccess() {
+    void clearServiceSuccess() throws AlreadyTakenException, BadRequestException, UnAuthorizedException {
+        RegisterRequest request = new RegisterRequest("water", "water", "water");
+        service.registerService(request);
+        service.loginService(new LoginRequest(request.username(), request.password()));
+        service.clearService();
+        Assertions.assertThrows(UnAuthorizedException.class, () ->
+                service.loginService(new LoginRequest(request.username(), request.password())));
+
 
 
 
@@ -129,8 +153,39 @@ class ServiceTest {
     }
 
     @Test
-    void joinGameService() {
+    void joinGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, BadRequestException {
+        RegisterRequest request = new RegisterRequest("water", "water", "water");
+        RegisterResult result = service.registerService(request);
+        RegisterRequest request1 = new RegisterRequest("fire", "water", "water");
+        RegisterResult result1 = service.registerService(request1);
+        CreateGameRequest gameRequest = new CreateGameRequest("game");
+        CreateGameResult gameResult = service.createGameService(result.authToken(), gameRequest);
+        JoinGameRequest joinRequest = new JoinGameRequest("WHITE", gameResult.gameID());
+        service.joinGameService(result.authToken(), joinRequest);
+        JoinGameRequest joinRequest1 = new JoinGameRequest("WHITE", gameResult.gameID());
+        Assertions.assertThrows(AlreadyTakenException.class, () ->
+                service.joinGameService(result1.authToken(),joinRequest1 ));
+
+
+
 
 
     }
+    @Test
+    void joinGameServiceFail() throws AlreadyTakenException, UnAuthorizedException {
+        RegisterRequest request = new RegisterRequest("water", "water", "water");
+        RegisterResult result = service.registerService(request);
+        CreateGameRequest gameRequest = new CreateGameRequest("game");
+        CreateGameResult gameResult = service.createGameService(result.authToken(), gameRequest);
+        JoinGameRequest joinRequest = new JoinGameRequest("WHITE", gameResult.gameID());
+        Assertions.assertThrows(UnAuthorizedException.class, () ->
+                service.joinGameService("result.authToken()", joinRequest));
+
+
+
+
+
+
+    }
+
 }
