@@ -16,7 +16,7 @@ import java.util.UUID;
 public class Service {
 
     private UserDataAccess userData = new UserDataAccess();
-    private AuthDataAccess authData = new AuthDataAccess();
+    AuthDataAccess authData = new AuthDataAccess();
     private GameDataAccess gameData = new GameDataAccess();
 
     public  String generateToken() {
@@ -131,16 +131,11 @@ public class Service {
 
         }
     }
+
 }
 
 
 
 
-    /*public LoginResult login(LoginRequest loginRequest) {
 
-    }
-    public void logout(LogoutRequest logoutRequest) {
-
-    }
-     */
 
