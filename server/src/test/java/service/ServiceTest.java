@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import server.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 class ServiceTest {
 
@@ -98,7 +99,7 @@ class ServiceTest {
     void listGamesServiceSuccess() throws AlreadyTakenException, UnAuthorizedException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
-        ArrayList<GameData> listOfGames = service.listGamesService(result.authToken());
+        Collection<GameData> listOfGames = service.listGamesService(result.authToken());
         Assertions.assertEquals(0, listOfGames.size());
 
 

@@ -24,9 +24,6 @@ public class GameDataAccess implements GameDAO {
     public void clear(){
         gameData.clear();
     }
-    public Collection<GameData> values(){
-        return gameData.values();
-    }
 
     public GameData getGame(Integer gameID){
         return gameData.get(gameID);
@@ -40,6 +37,17 @@ public class GameDataAccess implements GameDAO {
     public Integer randomID(){
         return (int)(Math.random() * 9000) + 1000;
     }
+
+
+    public Collection<GameData> listGames(){
+        ArrayList<GameData> result = new ArrayList<>();
+        for(GameData value : (gameData.values())){
+            result.add(value);
+        }
+        return result;
+
+    }
+
 
     public void updateGame(JoinGameRequest request, String username){
         GameData currentGame = getGame(request.gameID());

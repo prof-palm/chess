@@ -4,7 +4,9 @@ import model.AuthData;
 
 public interface AuthDAO {
 
-    public AuthData getAuthData(String authToken);
+    public AuthData getAuth(String authToken);
     public void createAuth(String username, String authToken);
     public void clear();
+    public void deleteAuth(String authToken);
+    public  boolean contains(String authToken);
 }

@@ -15,13 +15,12 @@ import java.util.Objects;
     }
 
 
-    public  HashMap<String, UserData> getUserDataBase(){
-        return userData;
+    public  boolean contains(String username){
+        return userData.containsKey(username);
     }
-    //all interactions with database happen here
 
 
-    public  UserData getUserData(String username) {
+    public  UserData getUser(String username) {
         return userData.get(username);
     }
 

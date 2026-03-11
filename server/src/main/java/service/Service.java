@@ -7,10 +7,7 @@ import model.AuthData;
 import model.GameData;
 import server.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class Service {
@@ -23,11 +20,11 @@ public class Service {
         return UUID.randomUUID().toString();
     }
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
-        if (userData.getUserData(request.username()) == null) {
+        if (userData.getUser(request.username()) == null) {
             userData.createUser(request);
             String authToken = generateToken();
             authData.createAuth(request.username(), authToken);
-            AuthData data = authData.getAuthData(authToken);
+            AuthData data = authData.getAuth(authToken);
             return new RegisterResult(data.username(), data.authToken());
 
         } else {
@@ -38,31 +35,30 @@ public class Service {
 
     }
 
-    //throws User not Found exception
-    //throws Unauthorized exception
+
     public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException {
-        if(!userData.getUserDataBase().containsKey(request.username())){
+        if(!userData.contains(request.username())){
             throw new UnAuthorizedException();
         }
-        else if (!(userData.getUserData(request.username()).password()).equals(request.password()) ){
+        else if (!(userData.getUser(request.username()).password()).equals(request.password()) ){
             throw new UnAuthorizedException();
         }
         else{
             String authToken = generateToken();
             authData.createAuth(request.username(), authToken);
-            AuthData data = authData.getAuthData(authToken);
+            AuthData data = authData.getAuth(authToken);
             return new LoginResult(data.username(), data.authToken());
 
 
         }
     }
     public void logoutService(String authToken)throws UnAuthorizedException{
-        if(!authData.getAuthDataBase().containsKey(authToken)){
+        if(!authData.contains(authToken)){
             throw new UnAuthorizedException();
 
         }
         else{
-            authData.getAuthDataBase().remove(authToken);
+            authData.deleteAuth(authToken);
 
 
 
@@ -70,18 +66,14 @@ public class Service {
 
 
     }
-    public ArrayList<GameData> listGamesService(String authToken)throws UnAuthorizedException{
+    public Collection<GameData> listGamesService(String authToken)throws UnAuthorizedException{
         //method getAuth, function below should just be included in authDataAccess
-        if(!authData.getAuthDataBase().containsKey(authToken)){
+        if(!authData.contains(authToken)){
             throw new UnAuthorizedException();
 
         }
         else{
-            ArrayList<GameData> result = new ArrayList<>();
-            for(GameData value : (gameData.getGameDataBase()).values()){
-                result.add(value);
-            }
-            return result;
+            return gameData.listGames();
 
 
         }
@@ -93,7 +85,7 @@ public class Service {
 
     }
     public CreateGameResult createGameService(String authToken, CreateGameRequest request)throws UnAuthorizedException{
-        if(!authData.getAuthDataBase().containsKey(authToken)){
+        if(!authData.contains(authToken)){
             throw new UnAuthorizedException();
 
         }
@@ -109,7 +101,7 @@ public class Service {
         }
     }
     public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException {
-        if (!authData.getAuthDataBase().containsKey(authToken)) {
+        if (!authData.contains(authToken)) {
             throw new UnAuthorizedException();
 
         } else {
@@ -124,7 +116,7 @@ public class Service {
                 throw new AlreadyTakenException();
             }
             else{
-                String username = authData.getAuthData(authToken).username();
+                String username = authData.getAuth(authToken).username();
                 gameData.updateGame(request, username);
 
             }

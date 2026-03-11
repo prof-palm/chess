@@ -16,11 +16,11 @@ public class AuthDataAccess implements AuthDAO{
     }
 
 
-    public HashMap<String, AuthData> getAuthDataBase(){
-        return authData;
+    public  boolean contains(String authToken){
+        return authData.containsKey(authToken);
     }
 
-    public AuthData getAuthData(String authToken) {
+    public AuthData getAuth(String authToken) {
         return authData.get(authToken);
     }
 
@@ -32,6 +32,12 @@ public class AuthDataAccess implements AuthDAO{
     }
     public void clear(){
         authData.clear();
+    }
+
+    public void deleteAuth(String authToken){
+        authData.remove(authToken);
+
+
     }
 
 

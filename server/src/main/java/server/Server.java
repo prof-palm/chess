@@ -8,6 +8,7 @@ import model.GameData;
 import service.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -166,7 +167,7 @@ public class Server {
         Gson serializer = new Gson();
         try{
             ctx.status(200);
-            ArrayList<GameData> listGames = service.listGamesService(authToken);
+            Collection<GameData> listGames = service.listGamesService(authToken);
             ListGamesResult result = new ListGamesResult(listGames);
             String json = serializer.toJson(result);
             ctx.result(json);

@@ -6,7 +6,8 @@ import server.RegisterRequest;
 public interface UserDAO {
 
     public void createUser(RegisterRequest request);
-    public UserData getUserData(String username);
+    public UserData getUser(String username);
     public void clear();
+    public  boolean contains(String username);
 
 }

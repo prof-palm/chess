@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface GameDAO {
     public void clear();
 
-    public Collection<GameData> values();
+    public Collection<GameData> listGames();
 
     public GameData getGame(Integer gameID);
 
