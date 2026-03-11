@@ -24,9 +24,9 @@ public class Service {
     }
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
         if (userData.getUserData(request.username()) == null) {
-            userData.createUser(userData.getUserDataBase(), request);
+            userData.createUser(request);
             String authToken = generateToken();
-            authData.createAuth(authData.getAuthDataBase(), request.username(), authToken);
+            authData.createAuth(request.username(), authToken);
             AuthData data = authData.getAuthData(authToken);
             return new RegisterResult(data.username(), data.authToken());
 
@@ -49,7 +49,7 @@ public class Service {
         }
         else{
             String authToken = generateToken();
-            authData.createAuth(authData.getAuthDataBase(), request.username(), authToken);
+            authData.createAuth(request.username(), authToken);
             AuthData data = authData.getAuthData(authToken);
             return new LoginResult(data.username(), data.authToken());
 

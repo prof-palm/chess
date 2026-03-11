@@ -6,7 +6,7 @@ import server.RegisterRequest;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class UserDataAccess {
+ public class UserDataAccess implements UserDAO {
 
     private HashMap<String, UserData> userData;
 
@@ -26,7 +26,7 @@ public class UserDataAccess {
     }
 
 
-    public void createUser(HashMap<String, UserData> userData, RegisterRequest request) {
+     public void createUser(RegisterRequest request) {
         userData.put(request.username(), new UserData(request.username(), request.password(), request.email()));
     }
     public void clear(){

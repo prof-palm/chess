@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class GameDataAccess {
+public class GameDataAccess implements GameDAO {
 
     private HashMap<Integer, GameData> gameData;
 

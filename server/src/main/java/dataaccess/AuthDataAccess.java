@@ -25,7 +25,7 @@ public class AuthDataAccess {
     }
 
 
-    public void createAuth(HashMap<String, AuthData> authData, String username, String authToken) {
+    public void createAuth(String username, String authToken) {
         authData.put(authToken, new AuthData(authToken, username));
 
 
