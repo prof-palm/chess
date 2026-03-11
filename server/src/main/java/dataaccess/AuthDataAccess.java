@@ -7,7 +7,7 @@ import server.RegisterRequest;
 
 import java.util.HashMap;
 
-public class AuthDataAccess {
+public class AuthDataAccess implements AuthDAO{
 
     private HashMap<String, AuthData> authData;
 
