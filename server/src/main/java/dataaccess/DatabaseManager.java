@@ -1,5 +1,7 @@
 package dataaccess;
 
+import server.RegisterRequest;
+
 import java.sql.*;
 import java.util.Properties;
 
@@ -74,4 +76,7 @@ public class DatabaseManager {
         var port = Integer.parseInt(props.getProperty("db.port"));
         connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
     }
+
+
+
 }

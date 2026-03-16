@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
+import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import model.GameData;
@@ -15,10 +16,17 @@ import java.util.List;
 public class Server {
 
     private final Javalin javalin;
+    private final Service service;
 
-    private final Service service = new Service();
+    public Server(){
+        this(new Service(new AuthDataAccess(), new UserDataAccess(), new GameDataAccess()));
+    }
 
-    public Server() {
+    public Server(Service service) {
+
+        this.service = service;
+
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.post("user",this::register);
         javalin.post("session", this::login);
