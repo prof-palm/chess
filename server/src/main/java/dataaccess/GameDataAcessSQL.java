@@ -4,6 +4,8 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 import model.UserData;
+import server.RegisterRequest;
+import service.CreateGameResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,6 +86,35 @@ public class GameDataAcessSQL {
         }
         return null;
     }
+    public Integer createGame(String gameName) throws SQLException {
+        try(Connection conn = getConnection()){
+            Integer gameID = randomID();
+            ChessGame game = new ChessGame();
+            Gson serializer = new Gson();
+            String gameSerialized = serializer.toJson(game);
+            try(var statement = conn.prepareStatement("INSERT INTO gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?,?)")) {
+                statement.setInt(1, gameID);
+                statement.setString(2, null);
+                statement.setString(3, null);
+                statement.setString(4, gameName);
+                statement.setString(5, gameSerialized);
+                return gameID;
+            }
+            catch(SQLException sql){
+                //something
+            }
+
+        }
+        catch(DataAccessException dte){
+            //something
+
+        }
+
+    }
+    public Integer randomID(){
+        return (int)(Math.random() * 9000) + 1000;
+    }
+
 
     public void clear(){
         try(Connection conn = getConnection()) {
