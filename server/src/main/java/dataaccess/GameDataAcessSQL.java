@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static dataaccess.DatabaseManager.createDatabase;
 import static dataaccess.DatabaseManager.getConnection;
@@ -109,8 +111,38 @@ public class GameDataAcessSQL {
             //something
 
         }
+        return null;
 
     }
+    public Collection<GameData> listGames(){
+        try(Connection conn = getConnection()){
+        ArrayList<GameData> result = new ArrayList<>();
+        var statement = "SELECT * from gameData";
+        try(PreparedStatement ps = conn.prepareStatement(statement)){
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    Gson serializer = new Gson();
+                    ChessGame game = serializer.fromJson(rs.getString("game"), ChessGame.class);
+                    GameData entry = new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                            rs.getString("blackUsername"), rs.getString("gameName"), game);
+                    result.add(entry);
+
+                }
+                return result;
+            }
+
+        }
+
+    }
+        catch(Exception exe){
+
+        }
+        return null;
+    }
+
+
+
+
     public Integer randomID(){
         return (int)(Math.random() * 9000) + 1000;
     }
