@@ -2,6 +2,7 @@ package dataaccess;
 
 import com.google.gson.Gson;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.RegisterRequest;
 
 import javax.xml.crypto.Data;
@@ -53,8 +54,7 @@ public class UserDataAccessSQL {
         try(Connection conn = getConnection()){
 
 
-        try(var statement = conn.prepareStatement("INSERT INTO userData (username, password, email) VALUES (?,?,?)")){
-
+        try(var statement = conn.prepareStatement("INSERT INTO userData (username, password, email) VALUES (?,?,?)")) {
         statement.setString(1, request.username());
         statement.setString(2, request.password());
         statement.setString(3, request.email());

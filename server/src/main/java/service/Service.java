@@ -4,6 +4,7 @@ import dataaccess.*;
 
 import model.AuthData;
 import model.GameData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.*;
 
 import java.util.*;
@@ -19,6 +20,12 @@ public class Service {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
         this.gameDAO = gameDAO;
+    }
+    public Service(){
+        authDAO = new AuthDataAccess();
+        userDAO = new UserDataAccess();
+        gameDAO = new GameDataAccess();
+
     }
 
     public  String generateToken() {
@@ -47,7 +54,7 @@ public class Service {
         if(!userDAO.contains(request.username())){
             throw new UnAuthorizedException();
         }
-        else if (!(userDAO.getUser(request.username()).password()).equals(request.password()) ){
+        else if (!verifyUser(request.password(), userDAO.getUser(request.username()).password()) ){
             throw new UnAuthorizedException();
         }
         else{
@@ -59,6 +66,11 @@ public class Service {
 
         }
     }
+    boolean verifyUser(String providedClearTextPassword, String hashedPassword ) {
+
+        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
+    }
+
     public void logoutService(String authToken)throws UnAuthorizedException{
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
