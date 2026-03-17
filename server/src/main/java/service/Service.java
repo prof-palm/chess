@@ -66,9 +66,9 @@ public class Service {
 
         }
     }
-    boolean verifyUser(String providedClearTextPassword, String hashedPassword ) {
+    boolean verifyUser(String clearPassword, String hashedPassword ) {
 
-        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
+        return BCrypt.checkpw(clearPassword, hashedPassword);
     }
 
     public void logoutService(String authToken)throws UnAuthorizedException{

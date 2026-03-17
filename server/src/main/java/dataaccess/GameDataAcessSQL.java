@@ -1,7 +1,13 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+import model.GameData;
+import model.UserData;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static dataaccess.DatabaseManager.createDatabase;
@@ -43,13 +49,41 @@ public class GameDataAcessSQL {
                                 whiteUsername VARCHAR(255),
                                 blackUsername VARCHAR(255),
                                 gameName VARCHAR(255) NOT NULL,
-                                game JSON,
+                                game TEXT NOT NULL,
                                 PRIMARY KEY (id)
                             )"""
 
     };
 
+    public GameData getGame(Integer gameID) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String whiteUsername = rs.getString("whiteUsername");
+                        String blackUsername = rs.getString("blackUsername");
+                        String gameName = rs.getString("gameName");
+                        String gameJSON = rs.getString("game");
+                        Gson serializer = new Gson();
+                        ChessGame game = serializer.fromJson(gameJSON, ChessGame.class);
+                        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                    }
+                    else{
+                        return null;
+                    }
+                }
+            }
+            catch(SQLException sql){
+                throw new SQLException();
 
+            }
+        } catch (DataAccessException | SQLException dte) {
+            System.out.print("Failed to access Database");
+        }
+        return null;
+    }
 
     public void clear(){
         try(Connection conn = getConnection()) {

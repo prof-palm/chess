@@ -27,7 +27,7 @@ public class UserDataAccessSQL {
 
     private void configureDatabase() throws DataAccessException {
         try (Connection conn = getConnection()) {
-            for (String statement : createUserDataTable) {
+            for (String statement : userDataTable) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
@@ -37,7 +37,7 @@ public class UserDataAccessSQL {
         }
     }
 
-    private final String[] createUserDataTable = {
+    private final String[] userDataTable = {
          """
                 CREATE TABLE  IF NOT EXISTS userData (
                                 id INT NOT NULL AUTO_INCREMENT,
