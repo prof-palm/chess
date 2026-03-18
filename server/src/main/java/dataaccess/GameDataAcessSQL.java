@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 import model.UserData;
+import server.JoinGameRequest;
 import server.RegisterRequest;
 import service.CreateGameResult;
 
@@ -60,6 +61,7 @@ public class GameDataAcessSQL {
     };
 
     public GameData getGame(Integer gameID) {
+        init();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -89,6 +91,7 @@ public class GameDataAcessSQL {
         return null;
     }
     public Integer createGame(String gameName) throws SQLException {
+        init();
         try(Connection conn = getConnection()){
             Integer gameID = randomID();
             ChessGame game = new ChessGame();
@@ -115,6 +118,7 @@ public class GameDataAcessSQL {
 
     }
     public Collection<GameData> listGames(){
+        init();
         try(Connection conn = getConnection()){
         ArrayList<GameData> result = new ArrayList<>();
         var statement = "SELECT * from gameData";
@@ -138,6 +142,43 @@ public class GameDataAcessSQL {
 
         }
         return null;
+    }
+
+    public void updateGame(JoinGameRequest request, String username){
+        init();
+        try(Connection conn = getConnection()){
+        if(request.playerColor().equals("WHITE")){
+            try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET whiteUsername=? WHERE gameID=?") ) {
+                updateRow.setString(1,username);
+                updateRow.setInt(2, request.gameID());
+                updateRow.executeQuery();
+
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+
+
+        }
+        else{
+            try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET blackUsername=? WHERE gameID=?") ) {
+                updateRow.setString(1,username);
+                updateRow.setInt(2, request.gameID());
+                updateRow.executeQuery();
+
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+    } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
