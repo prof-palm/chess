@@ -13,44 +13,7 @@ public class AuthDataAccessSQL implements AuthDAO{
 
 
 
-
-    public void init(){
-        try {
-            createDatabase();
-            configureDatabase();
-        }
-        catch(DataAccessException dte){
-            System.out.print("failed creation of database");
-        }
-    }
-
-    private void configureDatabase() throws DataAccessException {
-        try (Connection conn = getConnection()) {
-            for (String statement : createAuthDataTable) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (DataAccessException | SQLException ex) {
-            throw new DataAccessException("");
-        }
-    }
-
-
-
-    private final String[] createAuthDataTable = {
-            """
-                CREATE TABLE  IF NOT EXISTS authData (
-                                id INT NOT NULL AUTO_INCREMENT,
-                                authData VARCHAR(255) NOT NULL,
-                                username VARCHAR(255) NOT NULL,
-                                PRIMARY KEY (id)
-                            )"""
-
-    };
-
-    public void createAuth(String username, String authToken) {
-        init();
+    public void createAuth(String username, String authToken) throws DataAccessException {
         try(Connection conn = getConnection()){
 
 
@@ -58,18 +21,19 @@ public class AuthDataAccessSQL implements AuthDAO{
 
                 statement.setString(1, authToken);
                 statement.setString(2, username);
+                statement.executeUpdate();
             }
             catch(SQLException sql){
-                //something
+                throw new DataAccessException(sql.getMessage());
             }
 
         }
         catch(DataAccessException | SQLException dte){
-            //something
+            throw new DataAccessException(dte.getMessage());
 
         }
     }
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken)throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username FROM authData WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -85,15 +49,14 @@ public class AuthDataAccessSQL implements AuthDAO{
                 }
             }
             catch(SQLException sql){
-                throw new SQLException();
+                throw new DataAccessException(sql.getMessage());
 
             }
         } catch (DataAccessException | SQLException dte) {
-            System.out.print("Failed to access Database");
+            throw new DataAccessException(dte.getMessage());
         }
-        return null;
     }
-    public boolean contains(String authToken){
+    public boolean contains(String authToken) throws DataAccessException{
         try(Connection conn = getConnection()){
             var statement = "SELECT 1 FROM authData WHERE authToken = ? LIMIT 1";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
@@ -102,15 +65,13 @@ public class AuthDataAccessSQL implements AuthDAO{
                     return rs.next();
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
         }
 
 
     }
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws DataAccessException{
         try(Connection conn = getConnection()) {
             var statement = "DELETE FROM authData WHERE authToken=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
@@ -118,27 +79,20 @@ public class AuthDataAccessSQL implements AuthDAO{
                 ps.executeUpdate();
             }
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(e.getMessage());        }
 
     }
-    public void clear(){
+    public void clear() throws DataAccessException{
         try(Connection conn = getConnection()) {
-            var statement = "IF EXISTS DROP authData";
+            var statement = "DROP TABLE IF EXISTS authData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.executeUpdate();
             }
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
         }
 
     }
-
-
 }

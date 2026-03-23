@@ -9,6 +9,7 @@ import model.GameData;
 import org.mindrot.jbcrypt.BCrypt;
 import service.*;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -76,7 +77,7 @@ public class Server {
 
         }
 
-        catch(Exception ex){
+        catch(DataAccessException ex){
             ctx.status(500);
             ExceptionMessage message = new ExceptionMessage("Error: (description of error)");
             String json = serializer.toJson(message);
@@ -171,8 +172,12 @@ public class Server {
             ctx.result(json);
 
         }
-        catch(Exception ex){
+        catch(DataAccessException ex){
             ctx.status(500);
+            Gson serializer = new Gson();
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            String json = serializer.toJson(message);
+            ctx.result(json);
         }
 
 
@@ -198,6 +203,9 @@ public class Server {
         }
         catch(Exception ex){
             ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            String json = serializer.toJson(message);
+            ctx.result(json);
         }
 
 
@@ -234,13 +242,17 @@ public class Server {
             ctx.result(json);
 
         }
-        catch(Exception ex){
+        catch(DataAccessException ex){
             ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+
         }
 
     }
     public void CheckRequest(CreateGameRequest request) throws BadRequestException{
-        if(request.gameName()==null){
+        if(request.gameName() == null){
             throw new BadRequestException();
         }
 
@@ -259,6 +271,7 @@ public class Server {
             String json = serializer.toJson(message);
             ctx.result(json);
         }
+
     }
 
     public void joinGameHelper(Context ctx, JoinGameRequest request, Gson serializer, String authToken){
@@ -281,8 +294,14 @@ public class Server {
             ctx.result(json);
 
         }
-        catch(Exception ex){
+        catch(BadRequestException bqe){
+
+        }
+        catch(DataAccessException ex){
             ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            String json = serializer.toJson(message);
+            ctx.result(json);
         }
 
     }
@@ -299,10 +318,19 @@ public class Server {
 
 
     private void clear(Context ctx){
+        try{
         ctx.status(200);
         service.clearService();
 
         ctx.result("{}");
+        }catch(DataAccessException dae){
+            Gson serializer = new Gson();
+            ctx.status(500);
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            String json = serializer.toJson(message);
+            ctx.result(json);
+        }
+
     }
 
 

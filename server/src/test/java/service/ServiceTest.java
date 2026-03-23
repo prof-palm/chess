@@ -1,14 +1,18 @@
 package service;
 
+import dataaccess.AuthDataAccess;
+import dataaccess.AuthDataAccessSQL;
+import dataaccess.DataAccessException;
 import model.GameData;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import server.*;
 
+import javax.xml.crypto.Data;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+
+
 
 class ServiceTest {
 
@@ -19,7 +23,10 @@ class ServiceTest {
     void setup(){
         service = new Service();
     }
-
+    @AfterEach
+    void takedown() throws DataAccessException {
+        service.clearService();
+    }
 
     @Test
     @DisplayName("Successful username pass")
@@ -32,6 +39,8 @@ class ServiceTest {
         catch(AlreadyTakenException ate){
             System.out.print("Username is taken");
 
+        } catch (DataAccessException e) {
+            System.out.print("Error Accessing the DataBase");
         }
     }
     @Test
@@ -46,6 +55,8 @@ class ServiceTest {
         catch(AlreadyTakenException ate){
             System.out.print("Username is taken");
 
+        } catch (DataAccessException e) {
+            System.out.print("Error Accessing the DataBase");
         }
     }
 
@@ -75,7 +86,7 @@ class ServiceTest {
     }
 
     @Test
-    void logoutServiceSuccess() throws UnAuthorizedException, AlreadyTakenException {
+    void logoutServiceSuccess() throws UnAuthorizedException, AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         service.logoutService(result.authToken());
@@ -85,7 +96,7 @@ class ServiceTest {
     }
 
     @Test
-    void logoutServiceDoubleLogout() throws AlreadyTakenException, UnAuthorizedException {
+    void logoutServiceDoubleLogout() throws AlreadyTakenException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         service.logoutService(result.authToken());
@@ -96,7 +107,7 @@ class ServiceTest {
     }
 
     @Test
-    void listGamesServiceSuccess() throws AlreadyTakenException, UnAuthorizedException {
+    void listGamesServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         Collection<GameData> listOfGames = service.listGamesService(result.authToken());
@@ -105,7 +116,7 @@ class ServiceTest {
 
     }
     @Test
-    void listGamesServiceFail() throws AlreadyTakenException {
+    void listGamesServiceFail() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         service.registerService(request);
         Assertions.assertThrows(UnAuthorizedException.class, () ->
@@ -115,9 +126,9 @@ class ServiceTest {
     }
 
 
-
+//not clearing properly due to invalid salt
     @Test
-    void clearServiceSuccess() throws AlreadyTakenException, BadRequestException, UnAuthorizedException {
+    void clearServiceSuccess() throws AlreadyTakenException, BadRequestException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         service.registerService(request);
         service.loginService(new LoginRequest(request.username(), request.password()));
@@ -132,7 +143,7 @@ class ServiceTest {
     }
 
     @Test
-    void createGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException {
+    void createGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         CreateGameRequest gameRequest = new CreateGameRequest("Puss_in_Boots");
@@ -144,7 +155,7 @@ class ServiceTest {
 
     }
     @Test
-    void createGameServiceFail() throws AlreadyTakenException {
+    void createGameServiceFail() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         service.registerService(request);
         CreateGameRequest gameRequest = new CreateGameRequest("game");
@@ -152,9 +163,9 @@ class ServiceTest {
 
 
     }
-
+//joinGameService is not right by itself.
     @Test
-    void joinGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, BadRequestException {
+    void joinGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, BadRequestException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         RegisterRequest request1 = new RegisterRequest("fire", "water", "water");
@@ -173,7 +184,7 @@ class ServiceTest {
 
     }
     @Test
-    void joinGameServiceFail() throws AlreadyTakenException, UnAuthorizedException {
+    void joinGameServiceFail() throws AlreadyTakenException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
         RegisterResult result = service.registerService(request);
         CreateGameRequest gameRequest = new CreateGameRequest("game");

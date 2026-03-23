@@ -3,10 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
-import model.UserData;
 import server.JoinGameRequest;
-import server.RegisterRequest;
-import service.CreateGameResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,50 +15,10 @@ import java.util.Collection;
 import static dataaccess.DatabaseManager.createDatabase;
 import static dataaccess.DatabaseManager.getConnection;
 
-public class GameDataAcessSQL {
-    //Black and White username can be null
-//How do I deal with ChessGame object, use a serializer - BLOB?
-
-    public void init(){
-        try {
-            createDatabase();
-            configureDatabase();
-        }
-        catch(DataAccessException dte){
-            System.out.print("failed creation of database");
-        }
-    }
-
-    private void configureDatabase() throws DataAccessException {
-        try (Connection conn = getConnection()) {
-            for (String statement : GameDataTable) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (DataAccessException | SQLException ex) {
-            throw new DataAccessException("");
-        }
-    }
+public class GameDataAccessSQL implements GameDAO{
 
 
-    //figure out the serialization of chessGame
-    private final String[] GameDataTable = {
-            """
-                CREATE TABLE  IF NOT EXISTS gameData (
-                                id INT NOT NULL AUTO_INCREMENT,
-                                gameID INT NOT NULL,
-                                whiteUsername VARCHAR(255),
-                                blackUsername VARCHAR(255),
-                                gameName VARCHAR(255) NOT NULL,
-                                game TEXT NOT NULL,
-                                PRIMARY KEY (id)
-                            )"""
-
-    };
-
-    public GameData getGame(Integer gameID) {
-        init();
+    public GameData getGame(Integer gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -82,16 +39,14 @@ public class GameDataAcessSQL {
                 }
             }
             catch(SQLException sql){
-                throw new SQLException();
+                throw new DataAccessException(sql.getMessage());
 
             }
         } catch (DataAccessException | SQLException dte) {
-            System.out.print("Failed to access Database");
+            throw new DataAccessException(dte.getMessage());
         }
-        return null;
     }
-    public Integer createGame(String gameName) throws SQLException {
-        init();
+    public Integer createGame(String gameName) throws DataAccessException{
         try(Connection conn = getConnection()){
             Integer gameID = randomID();
             ChessGame game = new ChessGame();
@@ -103,22 +58,21 @@ public class GameDataAcessSQL {
                 statement.setString(3, null);
                 statement.setString(4, gameName);
                 statement.setString(5, gameSerialized);
+                statement.executeUpdate();
                 return gameID;
             }
             catch(SQLException sql){
-                //something
+                throw new DataAccessException("");
             }
 
         }
-        catch(DataAccessException dte){
-            //something
+        catch(DataAccessException | SQLException dte){
+            throw new DataAccessException("");
 
         }
-        return null;
 
     }
-    public Collection<GameData> listGames(){
-        init();
+    public Collection<GameData> listGames()throws DataAccessException{
         try(Connection conn = getConnection()){
         ArrayList<GameData> result = new ArrayList<>();
         var statement = "SELECT * from gameData";
@@ -139,13 +93,12 @@ public class GameDataAcessSQL {
 
     }
         catch(Exception exe){
+            throw new DataAccessException("");
 
         }
-        return null;
     }
 
-    public void updateGame(JoinGameRequest request, String username){
-        init();
+    public void updateGame(JoinGameRequest request, String username) throws DataAccessException{
         try(Connection conn = getConnection()){
         if(request.playerColor().equals("WHITE")){
             try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET whiteUsername=? WHERE gameID=?") ) {
@@ -155,10 +108,8 @@ public class GameDataAcessSQL {
 
 
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DataAccessException("");
             }
-
-
 
         }
         else{
@@ -169,15 +120,13 @@ public class GameDataAcessSQL {
 
 
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DataAccessException("");
             }
 
         }
 
-    } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+    } catch (SQLException sql) {
+            throw new DataAccessException("");
         }
     }
 
@@ -189,21 +138,16 @@ public class GameDataAcessSQL {
     }
 
 
-    public void clear(){
+    public void clear() throws DataAccessException{
         try(Connection conn = getConnection()) {
-            var statement = "IF EXISTS DROP gameData";
+            var statement = "DROP TABLE IF EXISTS gameData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.executeUpdate();
             }
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("");
         }
 
     }
-
-
-
 }

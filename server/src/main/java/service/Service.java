@@ -22,9 +22,9 @@ public class Service {
         this.gameDAO = gameDAO;
     }
     public Service(){
-        authDAO = new AuthDataAccess();
-        userDAO = new UserDataAccess();
-        gameDAO = new GameDataAccess();
+        authDAO = new AuthDataAccessSQL();
+        userDAO = new UserDataAccessSQL();
+        gameDAO = new GameDataAccessSQL();
 
     }
 
@@ -33,7 +33,7 @@ public class Service {
     }
 
 
-    public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException {
+    public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException, DataAccessException {
         if (userDAO.getUser(request.username()) == null) {
             userDAO.createUser(request);
             String authToken = generateToken();
@@ -50,7 +50,7 @@ public class Service {
     }
 
 
-    public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException {
+    public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException, DataAccessException {
         if(!userDAO.contains(request.username())){
             throw new UnAuthorizedException();
         }
@@ -71,7 +71,7 @@ public class Service {
         return BCrypt.checkpw(clearPassword, hashedPassword);
     }
 
-    public void logoutService(String authToken)throws UnAuthorizedException{
+    public void logoutService(String authToken)throws UnAuthorizedException, DataAccessException{
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
 
@@ -85,7 +85,7 @@ public class Service {
 
 
     }
-    public Collection<GameData> listGamesService(String authToken)throws UnAuthorizedException{
+    public Collection<GameData> listGamesService(String authToken)throws UnAuthorizedException, DataAccessException{
         //method getAuth, function below should just be included in authDataAccess
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
@@ -97,13 +97,13 @@ public class Service {
 
         }
     }
-    public void clearService(){
+    public void clearService()throws DataAccessException{
         gameDAO.clear();
         userDAO.clear();
         authDAO.clear();
 
     }
-    public CreateGameResult createGameService(String authToken, CreateGameRequest request)throws UnAuthorizedException{
+    public CreateGameResult createGameService(String authToken, CreateGameRequest request)throws UnAuthorizedException, DataAccessException{
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
 
@@ -119,7 +119,7 @@ public class Service {
 
         }
     }
-    public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException {
+    public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
         if (!authDAO.contains(authToken)) {
             throw new UnAuthorizedException();
 
