@@ -5,6 +5,7 @@ import dataaccess.AuthDataAccessSQL;
 import dataaccess.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.*;
+import org.mindrot.jbcrypt.BCrypt;
 import server.*;
 
 import javax.xml.crypto.Data;
@@ -30,49 +31,32 @@ class ServiceTest {
 
     @Test
     @DisplayName("Successful username pass")
-    void UsernameSuccessfullyStored() {
+    void UsernameSuccessfullyStored() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("Bobby", "water", "hi@gmail.com");
-        try{
         RegisterResult result = service.registerService(request);
             Assertions.assertEquals("Bobby", result.username());
     }
-        catch(AlreadyTakenException ate){
-            System.out.print("Username is taken");
-
-        } catch (DataAccessException e) {
-            System.out.print("Error Accessing the DataBase");
-        }
-    }
     @Test
-    void DuplicateEntry(){
+    void DuplicateEntry() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("Bobby", "water", "hi@gmail.com");
-
-        try{
-            service.registerService(request);
-            Assertions.assertThrows(AlreadyTakenException.class, () ->
+        service.registerService(request);
+        Assertions.assertThrows(AlreadyTakenException.class, () ->
                     service.registerService(request));
-        }
-        catch(AlreadyTakenException ate){
-            System.out.print("Username is taken");
 
-        } catch (DataAccessException e) {
-            System.out.print("Error Accessing the DataBase");
-        }
     }
 
 
 
 
     @Test
-    void loginServiceValidAuthToken() {
+    void loginServiceValidAuthToken() throws BadRequestException, UnAuthorizedException, DataAccessException, AlreadyTakenException {
+        RegisterRequest registerRequest= new RegisterRequest("Bob", "water", "hi@gmail.com");
+        RegisterResult registerResult = service.registerService(registerRequest);
         LoginRequest request = new LoginRequest("Bob", "water");
-        try{
-            LoginResult result = service.loginService(request);
-            Assertions.assertNotNull(result.authToken());
-        }
-        catch(Exception ex){
-            System.out.print("authToken not created");
-        }
+        LoginResult result = service.loginService(request);
+        Assertions.assertNotNull(result.authToken());
+
+
 
 
     }
@@ -126,7 +110,7 @@ class ServiceTest {
     }
 
 
-//not clearing properly due to invalid salt
+//not clearing properly due to invalid salt,this is due to it only being tested at service level, which does not store a hashed password
     @Test
     void clearServiceSuccess() throws AlreadyTakenException, BadRequestException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");

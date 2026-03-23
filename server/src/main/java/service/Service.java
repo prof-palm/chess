@@ -34,10 +34,12 @@ public class Service {
 
 
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException, DataAccessException {
-        if (userDAO.getUser(request.username()) == null) {
-            userDAO.createUser(request);
+        String hashedPassword = passwordHasher(request.password());
+        RegisterRequest hashedRequest = new RegisterRequest(request.username(), hashedPassword, request.email());
+        if (userDAO.getUser(hashedRequest.username()) == null) {
+            userDAO.createUser(hashedRequest);
             String authToken = generateToken();
-            authDAO.createAuth(request.username(), authToken);
+            authDAO.createAuth(hashedRequest.username(), authToken);
             AuthData data = authDAO.getAuth(authToken);
             return new RegisterResult(data.username(), data.authToken());
 
@@ -46,6 +48,10 @@ public class Service {
 
         }
 
+
+    }
+    private String passwordHasher(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
 
     }
 

@@ -85,7 +85,7 @@ public class AuthDataAccessSQL implements AuthDAO{
     }
     public void clear() throws DataAccessException{
         try(Connection conn = getConnection()) {
-            var statement = "DROP TABLE IF EXISTS authData";
+            var statement = "TRUNCATE TABLE authData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.executeUpdate();
             }

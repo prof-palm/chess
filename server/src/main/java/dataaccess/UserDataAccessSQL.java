@@ -66,7 +66,7 @@ public class UserDataAccessSQL implements UserDAO{
 
     public void clear() throws DataAccessException{
         try(Connection conn = getConnection()) {
-            var statement = "DROP TABLE IF EXISTS userData";
+            var statement = "TRUNCATE TABLE userData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.executeUpdate();
             }

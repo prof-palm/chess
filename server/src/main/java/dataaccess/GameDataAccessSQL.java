@@ -104,11 +104,11 @@ public class GameDataAccessSQL implements GameDAO{
             try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET whiteUsername=? WHERE gameID=?") ) {
                 updateRow.setString(1,username);
                 updateRow.setInt(2, request.gameID());
-                updateRow.executeQuery();
+                updateRow.executeUpdate();
 
 
             } catch (SQLException e) {
-                throw new DataAccessException("");
+                throw new DataAccessException(e.getMessage());
             }
 
         }
@@ -140,7 +140,7 @@ public class GameDataAccessSQL implements GameDAO{
 
     public void clear() throws DataAccessException{
         try(Connection conn = getConnection()) {
-            var statement = "DROP TABLE IF EXISTS gameData";
+            var statement = "TRUNCATE TABLE gameData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.executeUpdate();
             }

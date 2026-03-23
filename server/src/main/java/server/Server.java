@@ -43,11 +43,9 @@ public class Server {
     private void register(Context ctx) {
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
-        String hashedPassword = passwordHasher(request.password());
-        RegisterRequest hashedRequest = new RegisterRequest(request.username(), hashedPassword, request.email());
         try {
             CheckRequest(request);
-            registerHelper(ctx, hashedRequest, serializer);
+            registerHelper(ctx, request, serializer);
         } catch (BadRequestException bde) {
             ctx.status(400);
             ExceptionMessage message = new ExceptionMessage("Error: bad request");
@@ -55,10 +53,8 @@ public class Server {
             ctx.result(json);
         }
     }
-    String passwordHasher(String clearTextPassword) {
-        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
 
-    }
+
 
 
     public void registerHelper(Context ctx, RegisterRequest request, Gson serializer){
