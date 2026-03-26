@@ -6,7 +6,7 @@ import java.util.Collection;
 
 //Literally just create instances of both my Bishops moves class and RookMoves class, and then add them together
 public class QueenMoves extends PieceMoveCalculator {
-    Collection<ChessMove> q_m = new ArrayList<>() {
+    Collection<ChessMove> queenMoveList = new ArrayList<>() {
     };
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position ){
 
@@ -18,12 +18,12 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i, j);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -32,12 +32,12 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i, j);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -46,14 +46,14 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -62,14 +62,14 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -78,12 +78,12 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -93,12 +93,12 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -108,14 +108,14 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(row,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -125,20 +125,20 @@ public class QueenMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(row,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                q_m.add(new ChessMove(position, pos, null));
+                queenMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    q_m.add(new ChessMove(position, pos, null));
+                    queenMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
         }
 
-        return q_m; }
+        return queenMoveList; }
 
 }
 

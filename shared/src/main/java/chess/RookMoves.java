@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class RookMoves extends PieceMoveCalculator {
-        Collection<ChessMove> r_m = new ArrayList<>() {
+        Collection<ChessMove> rookMoveList = new ArrayList<>() {
         };
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
         int row = position.getRow();
         int col = position.getColumn();
-        ChessPiece s_piece = board.getPiece(position);
-        ChessGame.TeamColor ally = s_piece.getTeamColor();
+        ChessPiece pieceAtPosition = board.getPiece(position);
+        ChessGame.TeamColor ally = pieceAtPosition.getTeamColor();
         //Go up for rook
         for (int i = row + 1; i < 9; i++) {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                r_m.add(new ChessMove(position, pos, null));
+                rookMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    r_m.add(new ChessMove(position, pos, null));
+                    rookMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -31,12 +31,12 @@ public class RookMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
             if (piece == null) {
-                r_m.add(new ChessMove(position, pos, null));
+                rookMoveList.add(new ChessMove(position, pos, null));
             } else {
                 if (piece.getTeamColor() == ally) {
                     break;
                 } else {
-                    r_m.add(new ChessMove(position, pos, null));
+                    rookMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -46,14 +46,14 @@ public class RookMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(row,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                r_m.add(new ChessMove(position, pos, null));
+                rookMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    r_m.add(new ChessMove(position, pos, null));
+                    rookMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
@@ -63,20 +63,20 @@ public class RookMoves extends PieceMoveCalculator {
             ChessPosition pos = new ChessPosition(row,j);
             ChessPiece piece = board.getPiece(pos);
             if( piece == null){
-                r_m.add(new ChessMove(position, pos, null));
+                rookMoveList.add(new ChessMove(position, pos, null));
             }
             else{
                 if(piece.getTeamColor() == ally){
                     break;
                 }
                 else{
-                    r_m.add(new ChessMove(position, pos, null));
+                    rookMoveList.add(new ChessMove(position, pos, null));
                     break;
                 }
             }
         }
 
-        return r_m;
+        return rookMoveList;
     }
 
 }

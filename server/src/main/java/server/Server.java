@@ -1,18 +1,13 @@
 package server;
 
 import com.google.gson.Gson;
-import com.sun.net.httpserver.Headers;
 import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import model.GameData;
-import org.mindrot.jbcrypt.BCrypt;
 import service.*;
 
-import javax.xml.crypto.Data;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 
 public class Server {
@@ -44,7 +39,7 @@ public class Server {
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);
         try {
-            CheckRequest(request);
+            checkRequest(request);
             registerHelper(ctx, request, serializer);
         } catch (BadRequestException bde) {
             ctx.status(400);
@@ -86,7 +81,7 @@ public class Server {
 
 
 
-    public void CheckRequest(RegisterRequest request) throws BadRequestException{
+    public void checkRequest(RegisterRequest request) throws BadRequestException{
         if(request.username() == null || request.password() == null || request.email() == null){
             throw new BadRequestException();
         }
@@ -97,7 +92,7 @@ public class Server {
         Gson serializer = new Gson();
         LoginRequest request = serializer.fromJson(ctx.body(), LoginRequest.class);
         try{
-            CheckRequest(request);
+            checkRequest(request);
             loginHelper(ctx, request, serializer);
 
         }
@@ -111,7 +106,7 @@ public class Server {
 
 
     }
-    public void CheckRequest(LoginRequest request) throws BadRequestException{
+    public void checkRequest(LoginRequest request) throws BadRequestException{
         if(request.username() == null || request.password() == null){
             throw new BadRequestException();
         }
@@ -212,7 +207,7 @@ public class Server {
         Gson serializer = new Gson();
         CreateGameRequest request = serializer.fromJson(ctx.body(), CreateGameRequest.class);
         try {
-            CheckRequest(request);
+            checkRequest(request);
             createGameHelper(ctx, request, serializer, authToken);
         } catch (BadRequestException bde) {
             ctx.status(400);
@@ -247,7 +242,7 @@ public class Server {
         }
 
     }
-    public void CheckRequest(CreateGameRequest request) throws BadRequestException{
+    public void checkRequest(CreateGameRequest request) throws BadRequestException{
         if(request.gameName() == null){
             throw new BadRequestException();
         }
@@ -259,7 +254,7 @@ public class Server {
         Gson serializer = new Gson();
         JoinGameRequest request = serializer.fromJson(ctx.body(), JoinGameRequest.class);
         try {
-            CheckRequest(request);
+            checkRequest(request);
             joinGameHelper(ctx, request, serializer, authToken);
         } catch (BadRequestException bde) {
             ctx.status(400);
@@ -302,7 +297,7 @@ public class Server {
         }
 
     }
-    public void CheckRequest(JoinGameRequest request) throws BadRequestException{
+    public void checkRequest(JoinGameRequest request) throws BadRequestException{
         if(request.playerColor() == null || request.gameID() == null || !checkValidColor(request)){
             throw new BadRequestException();
         }

@@ -31,13 +31,13 @@ class ServiceTest {
 
     @Test
     @DisplayName("Successful username pass")
-    void UsernameSuccessfullyStored() throws AlreadyTakenException, DataAccessException {
+    void usernameSuccessfullyStored() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("Bobby", "water", "hi@gmail.com");
         RegisterResult result = service.registerService(request);
             Assertions.assertEquals("Bobby", result.username());
     }
     @Test
-    void DuplicateEntry() throws AlreadyTakenException, DataAccessException {
+    void duplicateEntry() throws AlreadyTakenException, DataAccessException {
         RegisterRequest request = new RegisterRequest("Bobby", "water", "hi@gmail.com");
         service.registerService(request);
         Assertions.assertThrows(AlreadyTakenException.class, () ->
