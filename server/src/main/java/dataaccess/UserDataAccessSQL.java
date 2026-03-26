@@ -8,7 +8,6 @@ import server.RegisterRequest;
 
 import java.sql.*;
 
-import static dataaccess.DatabaseManager.createDatabase;
 import static dataaccess.DatabaseManager.getConnection;
 
 public class UserDataAccessSQL implements UserDAO{
@@ -16,8 +15,6 @@ public class UserDataAccessSQL implements UserDAO{
 
     public void createUser(RegisterRequest request) throws DataAccessException{
         try(Connection conn = getConnection()){
-
-
         try(var statement = conn.prepareStatement("INSERT INTO userData (username, password, email) VALUES (?,?,?)")) {
         statement.setString(1, request.username());
         statement.setString(2, request.password());

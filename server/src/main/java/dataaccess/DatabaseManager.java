@@ -15,7 +15,7 @@ public class DatabaseManager {
      * Load the database information for the db.properties file.
      */
 
-    private static final String[] userDataTable = {
+    private static String[] userDataTable = {
             """
                 CREATE TABLE  IF NOT EXISTS userData (
                                 id INT NOT NULL AUTO_INCREMENT,
@@ -27,7 +27,7 @@ public class DatabaseManager {
 
     };
 
-    private static final String[] authDataTable = {
+    private static String[] authDataTable = {
             """
                 CREATE TABLE  IF NOT EXISTS authData (
                                 id INT NOT NULL AUTO_INCREMENT,
@@ -37,7 +37,7 @@ public class DatabaseManager {
                             )"""
 
     };
-    private static final String[] gameDataTable = {
+    private static String[] gameDataTable = {
             """
                 CREATE TABLE  IF NOT EXISTS gameData (
                                 id INT NOT NULL AUTO_INCREMENT,

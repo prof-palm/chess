@@ -21,7 +21,7 @@ public class Server {
     private final Service service;
 
     public Server(){
-        this(new Service(new AuthDataAccess(), new UserDataAccess(), new GameDataAccess()));
+        this(new Service());
     }
 
     public Server(Service service) {
@@ -141,7 +141,7 @@ public class Server {
 
         }
 
-        catch(Exception ex){
+        catch(DataAccessException ex){
             ctx.status(500);
             ExceptionMessage message = new ExceptionMessage("Error: (description of error)");
             String json = serializer.toJson(message);
@@ -197,9 +197,9 @@ public class Server {
             ctx.result(json);
 
         }
-        catch(Exception ex){
+        catch(DataAccessException ex){
             ctx.status(500);
-            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to database");
             String json = serializer.toJson(message);
             ctx.result(json);
         }
@@ -240,7 +240,7 @@ public class Server {
         }
         catch(DataAccessException ex){
             ctx.status(500);
-            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to databse");
+            ExceptionMessage message = new ExceptionMessage("Error: Failed to connect to database");
             String json = serializer.toJson(message);
             ctx.result(json);
 
@@ -270,7 +270,7 @@ public class Server {
 
     }
 
-    public void joinGameHelper(Context ctx, JoinGameRequest request, Gson serializer, String authToken){
+    public void joinGameHelper(Context ctx, JoinGameRequest request, Gson serializer, String authToken)throws BadRequestException{
         try{
             ctx.status(200);
             service.joinGameService(authToken, request);
@@ -291,6 +291,7 @@ public class Server {
 
         }
         catch(BadRequestException bqe){
+            throw new BadRequestException();
 
         }
         catch(DataAccessException ex){

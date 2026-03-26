@@ -116,17 +116,17 @@ public class GameDataAccessSQL implements GameDAO{
             try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET blackUsername=? WHERE gameID=?") ) {
                 updateRow.setString(1,username);
                 updateRow.setInt(2, request.gameID());
-                updateRow.executeQuery();
+                updateRow.executeUpdate();
 
 
             } catch (SQLException e) {
-                throw new DataAccessException("");
+                throw new DataAccessException(e.getMessage());
             }
 
         }
 
     } catch (SQLException sql) {
-            throw new DataAccessException("");
+            throw new DataAccessException(sql.getMessage());
         }
     }
 

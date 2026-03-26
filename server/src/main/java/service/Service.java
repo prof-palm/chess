@@ -34,21 +34,25 @@ public class Service {
 
 
     public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException, DataAccessException {
-        String hashedPassword = passwordHasher(request.password());
-        RegisterRequest hashedRequest = new RegisterRequest(request.username(), hashedPassword, request.email());
-        if (userDAO.getUser(hashedRequest.username()) == null) {
-            userDAO.createUser(hashedRequest);
-            String authToken = generateToken();
-            authDAO.createAuth(hashedRequest.username(), authToken);
-            AuthData data = authDAO.getAuth(authToken);
-            return new RegisterResult(data.username(), data.authToken());
+        try {
+            String hashedPassword = passwordHasher(request.password());
+            RegisterRequest hashedRequest = new RegisterRequest(request.username(), hashedPassword, request.email());
+            if (userDAO.getUser(hashedRequest.username()) == null) {
+                userDAO.createUser(hashedRequest);
+                String authToken = generateToken();
+                authDAO.createAuth(hashedRequest.username(), authToken);
+                AuthData data = authDAO.getAuth(authToken);
+                return new RegisterResult(data.username(), data.authToken());
 
-        } else {
-            throw new AlreadyTakenException();
+            } else {
+                throw new AlreadyTakenException();
+
+            }
 
         }
-
-
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
+        }
     }
     private String passwordHasher(String clearTextPassword) {
         return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
@@ -57,7 +61,7 @@ public class Service {
 
 
     public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException, DataAccessException {
-        if(!userDAO.contains(request.username())){
+        try{if(!userDAO.contains(request.username())){
             throw new UnAuthorizedException();
         }
         else if (!verifyUser(request.password(), userDAO.getUser(request.username()).password()) ){
@@ -71,6 +75,10 @@ public class Service {
 
 
         }
+        }
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
+        }
     }
     boolean verifyUser(String clearPassword, String hashedPassword ) {
 
@@ -78,38 +86,49 @@ public class Service {
     }
 
     public void logoutService(String authToken)throws UnAuthorizedException, DataAccessException{
-        if(!authDAO.contains(authToken)){
-            throw new UnAuthorizedException();
-
+        try{
+            if(!authDAO.contains(authToken)){
+                throw new UnAuthorizedException();
+            }
+            else{
+                authDAO.deleteAuth(authToken);
+            }
         }
-        else{
-            authDAO.deleteAuth(authToken);
-
-
-
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
         }
 
 
     }
+
     public Collection<GameData> listGamesService(String authToken)throws UnAuthorizedException, DataAccessException{
-        //method getAuth, function below should just be included in authDataAccess
+        try{
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
 
         }
         else{
+
             return gameDAO.listGames();
-
-
+        }
+        }
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
         }
     }
     public void clearService()throws DataAccessException{
+        try{
         gameDAO.clear();
         userDAO.clear();
-        authDAO.clear();
+        authDAO.clear();}
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
+        }
+
 
     }
     public CreateGameResult createGameService(String authToken, CreateGameRequest request)throws UnAuthorizedException, DataAccessException{
+        try{
         if(!authDAO.contains(authToken)){
             throw new UnAuthorizedException();
 
@@ -124,8 +143,13 @@ public class Service {
 
 
         }
+        }
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
+        }
     }
     public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
+        try{
         if (!authDAO.contains(authToken)) {
             throw new UnAuthorizedException();
 
@@ -146,6 +170,10 @@ public class Service {
 
             }
 
+        }
+        }
+        catch(DataAccessException dae){
+            throw new DataAccessException(dae.getMessage());
         }
     }
 
