@@ -52,7 +52,8 @@ public class GameDataAccessSQL implements GameDAO{
             ChessGame game = new ChessGame();
             Gson serializer = new Gson();
             String gameSerialized = serializer.toJson(game);
-            try(var statement = conn.prepareStatement("INSERT INTO gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?,?)")) {
+            try(var statement = conn.prepareStatement(
+                    "INSERT INTO gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?,?)")) {
                 statement.setInt(1, gameID);
                 statement.setString(2, null);
                 statement.setString(3, null);

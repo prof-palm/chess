@@ -11,7 +11,6 @@ public class RookMoves extends PieceMoveCalculator {
         int col = position.getColumn();
         ChessPiece pieceAtPosition = board.getPiece(position);
         ChessGame.TeamColor ally = pieceAtPosition.getTeamColor();
-        //Go up for rook
         for (int i = row + 1; i < 9; i++) {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
@@ -26,7 +25,6 @@ public class RookMoves extends PieceMoveCalculator {
                 }
             }
         }
-        //rook goes down
         for (int i = row - 1; i > 0; i--) {
             ChessPosition pos = new ChessPosition(i, col);
             ChessPiece piece = board.getPiece(pos);
@@ -58,7 +56,6 @@ public class RookMoves extends PieceMoveCalculator {
                 }
             }
         }
-        //rook goes left
         for(int j = col - 1; j > 0; j--){
             ChessPosition pos = new ChessPosition(row,j);
             ChessPiece piece = board.getPiece(pos);

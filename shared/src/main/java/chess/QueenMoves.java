@@ -9,136 +9,29 @@ public class QueenMoves extends PieceMoveCalculator {
     Collection<ChessMove> queenMoveList = new ArrayList<>() {
     };
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position ){
+        Collection<ChessMove> bishopsList =  bishopMovesList(board, position);
+        Collection<ChessMove> rooksList = rookMovesList(board, position);
+        queenMoveList.addAll(bishopsList);
+        queenMoveList.addAll(rooksList);
+        return queenMoveList;
 
-        int row = position.getRow();
-        int col = position.getColumn();
-        ChessPiece s_piece = board.getPiece(position);
-        ChessGame.TeamColor ally = s_piece.getTeamColor();
-        for (int i = row + 1, j = col + 1; i < 9 && j < 9; i++, j++) {
-            ChessPosition pos = new ChessPosition(i, j);
-            ChessPiece piece = board.getPiece(pos);
-            if (piece == null) {
-                queenMoveList.add(new ChessMove(position, pos, null));
-            } else {
-                if (piece.getTeamColor() == ally) {
-                    break;
-                } else {
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        for (int i = row + 1, j = col - 1; i < 9 && j > 0; i++, j--) {
-            ChessPosition pos = new ChessPosition(i, j);
-            ChessPiece piece = board.getPiece(pos);
-            if (piece == null) {
-                queenMoveList.add(new ChessMove(position, pos, null));
-            } else {
-                if (piece.getTeamColor() == ally) {
-                    break;
-                } else {
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        for(int i = row - 1, j = col + 1; i > 0 && j < 9; i--, j++){
-            ChessPosition pos = new ChessPosition(i,j);
-            ChessPiece piece = board.getPiece(pos);
-            if( piece == null){
-                queenMoveList.add(new ChessMove(position, pos, null));
-            }
-            else{
-                if(piece.getTeamColor() == ally){
-                    break;
-                }
-                else{
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        for(int i = row - 1, j = col - 1; i > 0 && j > 0; i--, j--){
-            ChessPosition pos = new ChessPosition(i,j);
-            ChessPiece piece = board.getPiece(pos);
-            if( piece == null){
-                queenMoveList.add(new ChessMove(position, pos, null));
-            }
-            else{
-                if(piece.getTeamColor() == ally){
-                    break;
-                }
-                else{
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        for (int i = row + 1; i < 9; i++) {
-            ChessPosition pos = new ChessPosition(i, col);
-            ChessPiece piece = board.getPiece(pos);
-            if (piece == null) {
-                queenMoveList.add(new ChessMove(position, pos, null));
-            } else {
-                if (piece.getTeamColor() == ally) {
-                    break;
-                } else {
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        //rook goes down
-        for (int i = row - 1; i > 0; i--) {
-            ChessPosition pos = new ChessPosition(i, col);
-            ChessPiece piece = board.getPiece(pos);
-            if (piece == null) {
-                queenMoveList.add(new ChessMove(position, pos, null));
-            } else {
-                if (piece.getTeamColor() == ally) {
-                    break;
-                } else {
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        //rook goes right
-        for(int j = col + 1; j < 9; j++){
-            ChessPosition pos = new ChessPosition(row,j);
-            ChessPiece piece = board.getPiece(pos);
-            if( piece == null){
-                queenMoveList.add(new ChessMove(position, pos, null));
-            }
-            else{
-                if(piece.getTeamColor() == ally){
-                    break;
-                }
-                else{
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
-        //rook goes left
-        for(int j = col - 1; j > 0; j--){
-            ChessPosition pos = new ChessPosition(row,j);
-            ChessPiece piece = board.getPiece(pos);
-            if( piece == null){
-                queenMoveList.add(new ChessMove(position, pos, null));
-            }
-            else{
-                if(piece.getTeamColor() == ally){
-                    break;
-                }
-                else{
-                    queenMoveList.add(new ChessMove(position, pos, null));
-                    break;
-                }
-            }
-        }
 
-        return queenMoveList; }
+
+}
+
+public Collection<ChessMove> bishopMovesList(ChessBoard board, ChessPosition myPosition){
+    BishopMoves Bishop_Moves = new BishopMoves();
+    return Bishop_Moves.pieceMoves(board, myPosition);
+}
+
+public Collection<ChessMove> rookMovesList(ChessBoard board, ChessPosition myPosition){
+    RookMoves Rook_Moves = new RookMoves();
+    return Rook_Moves.pieceMoves(board, myPosition);
+    }
+
+
+
+
 
 }
 

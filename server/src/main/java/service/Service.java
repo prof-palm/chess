@@ -136,23 +136,17 @@ public class Service {
         else{
             Integer gameID = gameDAO.createGame(request.gameName());
             return new CreateGameResult(gameID);
-
-
-
-
-
-
         }
         }
         catch(DataAccessException dae){
             throw new DataAccessException(dae.getMessage());
         }
     }
-    public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
+    public void joinGameService(String authToken, JoinGameRequest request)throws UnAuthorizedException, BadRequestException,
+            AlreadyTakenException, DataAccessException {
         try{
         if (!authDAO.contains(authToken)) {
             throw new UnAuthorizedException();
-
         } else {
             if (gameDAO.getGame(request.gameID()) == null) {
                 throw new BadRequestException();
