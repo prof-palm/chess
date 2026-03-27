@@ -20,13 +20,13 @@ public class QueenMoves extends PieceMoveCalculator {
 }
 
 public Collection<ChessMove> bishopMovesList(ChessBoard board, ChessPosition myPosition){
-    BishopMoves Bishop_Moves = new BishopMoves();
-    return Bishop_Moves.pieceMoves(board, myPosition);
+    BishopMoves bishopMoves = new BishopMoves();
+    return bishopMoves.pieceMoves(board, myPosition);
 }
 
 public Collection<ChessMove> rookMovesList(ChessBoard board, ChessPosition myPosition){
-    RookMoves Rook_Moves = new RookMoves();
-    return Rook_Moves.pieceMoves(board, myPosition);
+    RookMoves rookMoves = new RookMoves();
+    return rookMoves.pieceMoves(board, myPosition);
     }
 
 

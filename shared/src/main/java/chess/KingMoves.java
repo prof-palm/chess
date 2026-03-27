@@ -19,8 +19,7 @@ public class KingMoves extends PieceMoveCalculator{
             }
             else{
                 if (ally != pieceUp.getTeamColor()) {
-                    kingMoveList.add(new ChessMove(position, positionUp, null));
-                }
+                    kingMoveList.add(new ChessMove(position, positionUp, null));}
             }
         }
         if(row - 1 > 0){
@@ -31,8 +30,7 @@ public class KingMoves extends PieceMoveCalculator{
             }
             else{
                 if (ally != pieceDown.getTeamColor()) {
-                    kingMoveList.add(new ChessMove(position, positionDown, null));
-                }
+                    kingMoveList.add(new ChessMove(position, positionDown, null));}
             }
         }
         if( col - 1 > 0){
@@ -43,8 +41,7 @@ public class KingMoves extends PieceMoveCalculator{
             }
             else{
                 if (ally != pieceLeft.getTeamColor()) {
-                    kingMoveList.add(new ChessMove(position, positionLeft, null));
-                }
+                    kingMoveList.add(new ChessMove(position, positionLeft, null));}
             }
         }
         if(col + 1 < 9){
@@ -55,8 +52,7 @@ public class KingMoves extends PieceMoveCalculator{
             }
             else{
                 if (ally != pieceRight.getTeamColor()) {
-                    kingMoveList.add(new ChessMove(position, positionRight, null));
-                }
+                    kingMoveList.add(new ChessMove(position, positionRight, null));}
             }
         }
         if ( row + 1 < 9 && col + 1 < 9){
