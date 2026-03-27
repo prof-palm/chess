@@ -33,12 +33,6 @@ import java.util.Objects;
 
     }
 
-
-
-    //    public static void removeUserData(HashMap<String, List<String>> userData, LogoutRequest request){
-//        userData.remove(request.username);
-//    }
-
 }
 
 

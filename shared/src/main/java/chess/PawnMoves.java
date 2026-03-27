@@ -10,19 +10,13 @@ public class PawnMoves extends PieceMoveCalculator {
     Collection<ChessMove> pawnMoveList = new ArrayList<>() {
     };
 
-    public void possiblePromotionsWhite(ChessPosition startPosition, ChessPosition endPosition){
+    public void possiblePromotions(ChessPosition startPosition, ChessPosition endPosition){
         pawnMoveList.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
         pawnMoveList.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
         pawnMoveList.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
         pawnMoveList.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
     }
 
-    public void possiblePromotionsBlack(ChessPosition position, ChessPosition endPosition){
-        pawnMoveList.add(new ChessMove(position, endPosition, ChessPiece.PieceType.QUEEN));
-        pawnMoveList.add(new ChessMove(position, endPosition, ChessPiece.PieceType.ROOK));
-        pawnMoveList.add(new ChessMove(position, endPosition, ChessPiece.PieceType.BISHOP));
-        pawnMoveList.add(new ChessMove(position, endPosition, ChessPiece.PieceType.KNIGHT));
-    }
 
     public void pawnDiagonalMovesWhite(int col, int row, ChessBoard board, ChessGame.TeamColor color, ChessPosition position){
         if (col + 1 < 9) {
@@ -60,14 +54,14 @@ public class PawnMoves extends PieceMoveCalculator {
     public void pawnPromotesWhite(int row, int col, ChessBoard board, ChessGame.TeamColor color, ChessPosition position){
         ChessPosition positionUp = new ChessPosition(row + 1, col);
         if (board.getPiece(positionUp) == null) {
-            possiblePromotionsWhite(position, positionUp);
+            possiblePromotions(position, positionUp);
         }
 
         if (col + 1 < 9) {
             ChessPosition positionUpRight = new ChessPosition(row + 1, col + 1);
             ChessPiece pieceUpRight = board.getPiece(positionUpRight);
             if (pieceUpRight != null && color != pieceUpRight.getTeamColor()) {
-                possiblePromotionsWhite(position, positionUpRight);
+                possiblePromotions(position, positionUpRight);
             }
         }
 
@@ -75,21 +69,21 @@ public class PawnMoves extends PieceMoveCalculator {
             ChessPosition positionUpLeft = new ChessPosition(row + 1, col - 1);
             ChessPiece pieceUpLeft = board.getPiece(positionUpLeft);
             if (pieceUpLeft != null && color != pieceUpLeft.getTeamColor()) {
-                possiblePromotionsWhite(position, positionUpLeft);
+                possiblePromotions(position, positionUpLeft);
             }
         }
     }
     public void pawnPromotesBlack(int row, int col, ChessBoard board, ChessGame.TeamColor color, ChessPosition position){
         ChessPosition positionDown = new ChessPosition(row - 1, col);
         if (board.getPiece(positionDown) == null) {
-            possiblePromotionsBlack(position,  positionDown);
+            possiblePromotions(position,  positionDown);
         }
 
         if (col + 1 < 9) {
             ChessPosition positionDownRight = new ChessPosition(row - 1, col + 1);
             ChessPiece pieceDownRight = board.getPiece(positionDownRight);
             if (pieceDownRight != null && color != pieceDownRight.getTeamColor()) {
-                possiblePromotionsBlack(position,  positionDownRight);
+                possiblePromotions(position,  positionDownRight);
             }
         }
 
@@ -97,7 +91,7 @@ public class PawnMoves extends PieceMoveCalculator {
             ChessPosition positionDownLeft = new ChessPosition(row - 1, col - 1);
             ChessPiece pieceDownLeft = board.getPiece(positionDownLeft);
             if (pieceDownLeft != null && color != pieceDownLeft.getTeamColor()) {
-                possiblePromotionsBlack(position,  positionDownLeft);
+                possiblePromotions(position,  positionDownLeft);
             }
         }
 

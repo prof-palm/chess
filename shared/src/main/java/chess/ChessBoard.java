@@ -102,15 +102,14 @@ public class ChessBoard implements Cloneable {
 
     public ChessBoard clone(){
         try{
-            //this gives me a shallow copy
             ChessBoard clone = (ChessBoard)super.clone();
-            ChessPiece [][] cloned_array = new ChessPiece[8][8];
+            ChessPiece [][] clonedArray = new ChessPiece[8][8];
             for(int i = 1; i < 9; i++) {
                 for(int j = 1; j < 9; j++){
-                    cloned_array[i - 1][j - 1] = getPiece(new ChessPosition(i,j));
+                    clonedArray[i - 1][j - 1] = getPiece(new ChessPosition(i,j));
                 }
             }
-            clone.setSquares(cloned_array);
+            clone.setSquares(clonedArray);
 
             return clone;
 

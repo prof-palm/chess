@@ -56,28 +56,28 @@ public class ChessPiece {
     public  Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (this.getPieceType() == PieceType.BISHOP) {
-           BishopMoves Bishop_Moves = new BishopMoves();
-           return Bishop_Moves.pieceMoves(board, myPosition);
+           BishopMoves bishopMoves = new BishopMoves();
+           return bishopMoves.pieceMoves(board, myPosition);
             }
         else if(this.getPieceType() == PieceType.ROOK){
-            RookMoves Rook_Moves = new RookMoves();
-            return Rook_Moves.pieceMoves(board, myPosition);
+            RookMoves rookMoves = new RookMoves();
+            return rookMoves.pieceMoves(board, myPosition);
         }
         else if(piece.getPieceType() == PieceType.QUEEN){
-            QueenMoves Queen_Moves = new QueenMoves();
-            return Queen_Moves.pieceMoves(board, myPosition);
+            QueenMoves queenMoves = new QueenMoves();
+            return queenMoves.pieceMoves(board, myPosition);
         }
         else if(piece.getPieceType() == PieceType.KING){
-            KingMoves King_Moves = new KingMoves();
-            return King_Moves.pieceMoves(board, myPosition);
+            KingMoves kingMoves = new KingMoves();
+            return kingMoves.pieceMoves(board, myPosition);
         }
         else if(piece.getPieceType() == PieceType.PAWN){
-            PawnMoves Pawn_Moves = new PawnMoves();
-            return Pawn_Moves.pieceMoves(board, myPosition);
+            PawnMoves pawnMoves = new PawnMoves();
+            return pawnMoves.pieceMoves(board, myPosition);
         }
         else if(piece.getPieceType() == PieceType.KNIGHT){
-            KnightMoves Knight_Moves = new KnightMoves();
-            return Knight_Moves.pieceMoves(board, myPosition);
+            KnightMoves knightMoves = new KnightMoves();
+            return knightMoves.pieceMoves(board, myPosition);
         }
 
 

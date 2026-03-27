@@ -63,9 +63,9 @@ public class ChessGame implements Cloneable {
 
         }
         else {
-            Collection<ChessMove> poss_moves = piece.pieceMoves(gameBoard, startPosition);
+            Collection<ChessMove> possibleMoves = piece.pieceMoves(gameBoard, startPosition);
             ChessGame.TeamColor color = piece.getTeamColor();
-            for (ChessMove move : poss_moves) {
+            for (ChessMove move : possibleMoves) {
                 ChessBoard clone = gameBoard.clone();
                 shadowMove(move, clone);
                 if (!isInCheck(color, clone)) {
@@ -103,10 +103,10 @@ public class ChessGame implements Cloneable {
                     actualMoveList.add(validMove);
                     if(pieceAtPosition.getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 8 || end.getRow() == 1 )){
                         ChessPiece.PieceType promo = move.getPromotionPiece();
-                        ChessPiece promo_piece = new ChessPiece(teamTurn, promo);
+                        ChessPiece promotionPiece = new ChessPiece(teamTurn, promo);
                         gameBoard.addPiece(start, null);
                         gameBoard.addPiece(end, null);
-                        gameBoard.addPiece(end, promo_piece);
+                        gameBoard.addPiece(end, promotionPiece);
                     }
                     else{
                         gameBoard.addPiece(start, null);
@@ -191,8 +191,8 @@ public class ChessGame implements Cloneable {
                     doNothing();
                 }
                 else{
-                    ChessPiece p_type = board.getPiece(new ChessPosition(i, j));
-                    if(p_type.getPieceType() == ChessPiece.PieceType.KING){
+                    ChessPiece pieceType = board.getPiece(new ChessPosition(i, j));
+                    if(pieceType.getPieceType() == ChessPiece.PieceType.KING){
                         return new ChessPosition(i, j);
 
                     }
