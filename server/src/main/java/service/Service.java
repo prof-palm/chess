@@ -5,6 +5,13 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import org.mindrot.jbcrypt.BCrypt;
+import requests.CreateGameRequest;
+import requests.JoinGameRequest;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import results.CreateGameResult;
+import results.LoginResult;
+import results.RegisterResult;
 import server.*;
 
 import java.util.*;
@@ -33,7 +40,7 @@ public class Service {
     }
 
 
-    public  RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException, DataAccessException {
+    public RegisterResult registerService(RegisterRequest request) throws AlreadyTakenException, DataAccessException {
         try {
             String hashedPassword = passwordHasher(request.password());
             RegisterRequest hashedRequest = new RegisterRequest(request.username(), hashedPassword, request.email());

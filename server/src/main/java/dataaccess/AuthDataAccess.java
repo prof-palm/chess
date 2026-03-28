@@ -1,9 +1,5 @@
 package dataaccess;
-import java.util.Objects;
-import java.util.UUID;
 import model.AuthData;
-import model.UserData;
-import server.RegisterRequest;
 
 import java.util.HashMap;
 

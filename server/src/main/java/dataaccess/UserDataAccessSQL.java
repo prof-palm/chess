@@ -1,9 +1,7 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
-import server.RegisterRequest;
+import requests.RegisterRequest;
 
 
 import java.sql.*;

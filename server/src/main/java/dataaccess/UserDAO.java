@@ -1,7 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-import server.RegisterRequest;
+import requests.RegisterRequest;
 
 public interface UserDAO {
 

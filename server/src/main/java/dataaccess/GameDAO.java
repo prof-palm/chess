@@ -1,9 +1,8 @@
 package dataaccess;
 
 import model.GameData;
-import server.JoinGameRequest;
+import requests.JoinGameRequest;
 
-import javax.xml.crypto.Data;
 import java.util.Collection;
 
 public interface GameDAO {

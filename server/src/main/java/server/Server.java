@@ -5,6 +5,11 @@ import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import model.GameData;
+import requests.CreateGameRequest;
+import requests.JoinGameRequest;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import results.*;
 import service.*;
 
 import java.util.Collection;

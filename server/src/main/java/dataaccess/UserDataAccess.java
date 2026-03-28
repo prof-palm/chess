@@ -1,12 +1,11 @@
 package dataaccess;
 
 import model.UserData;
-import server.RegisterRequest;
+import requests.RegisterRequest;
 
 import java.util.HashMap;
-import java.util.Objects;
 
- public class UserDataAccess implements UserDAO {
+public class UserDataAccess implements UserDAO {
 
     private HashMap<String, UserData> userData;
 

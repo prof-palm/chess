@@ -1,5 +1,3 @@
-package server;
-
-import org.mindrot.jbcrypt.BCrypt;
+package requests;
 
 public record RegisterRequest(String username, String password, String email){}
