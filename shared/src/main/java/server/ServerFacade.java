@@ -1,8 +1,12 @@
 package server;
 
 import com.google.gson.Gson;
+import requests.CreateGameRequest;
+import requests.JoinGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
+import results.CreateGameResult;
+import results.ListGamesResult;
 import results.LoginResult;
 import results.RegisterResult;
 
@@ -20,61 +24,95 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public RegisterResult register(RegisterRequest request){}
+    public RegisterResult register(RegisterRequest request){
+        var httpRequest = buildRequest("POST", "/user", request);
+        var response = sendRequest(httpRequest);
+        return handleResponse(response, RegisterResult.class);
+    }
 
-    public LoginResult login(LoginRequest request){}
+    public LoginResult login(LoginRequest request){
+        var httpRequest = buildRequest("POST", "/session", request);
+        var response = sendRequest(httpRequest);
+        return handleResponse(response, LoginResult.class);
+    }
+
+    public void logout(String authToken){
+        var httpRequest = buildRequest("DELETE", "/session", authToken);
+        var response = sendRequest(httpRequest);
+        handleResponse(response, null);
+    }
+
+    public ListGamesResult listGame(){
+        var httpRequest = buildRequest("GET", "/game", null);
+        var response = sendRequest(httpRequest);
+        return handleResponse(response, ListGamesResult.class);
+    }
+    public CreateGameResult createGame(CreateGameRequest request){
+        var httpRequest = buildRequest("POST", "/game", request);
+        var response = sendRequest(httpRequest);
+        return handleResponse(response, CreateGameResult.class);
+    }
+
+    public void joinGame(JoinGameRequest request){
+        var httpRequest = buildRequest("PUT", "/game", request);
+        var response = sendRequest(httpRequest);
+        handleResponse(response, null);
+    }
+
+    public void clear(){
+        var request = buildRequest("DELETE", "/db", null);
+        sendRequest(request);
+    }
 
 
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+        if (body != null) {
+            request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
+    }
 
+    private HttpRequest.BodyPublisher makeRequestBody(Object request) {
+        if (request != null) {
+            return HttpRequest.BodyPublishers.ofString(new Gson().toJson(request));
+        } else {
+            return HttpRequest.BodyPublishers.noBody();
+        }
+    }
 
-//    private HttpRequest buildRequest(String method, String path, Object body) {
-//        var request = HttpRequest.newBuilder()
-//                .uri(URI.create(serverUrl + path))
-//                .method(method, makeRequestBody(body));
-//        if (body != null) {
-//            request.setHeader("Content-Type", "application/json");
-//        }
-//        return request.build();
-//    }
-//
-//    private HttpRequest.BodyPublisher makeRequestBody(Object request) {
-//        if (request != null) {
-//            return HttpRequest.BodyPublishers.ofString(new Gson().toJson(request));
-//        } else {
-//            return HttpRequest.BodyPublishers.noBody();
-//        }
-//    }
-//
-//    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
-//        try {
-//            return client.send(request, HttpResponse.BodyHandlers.ofString());
-//        } catch (Exception ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-//    }
-//
-//    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
-//        var status = response.statusCode();
-//        if (!isSuccessful(status)) {
-//            var body = response.body();
-//            if (body != null) {
-//                throw ResponseException.fromJson(body);
-//            }
-//
-//            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
-//        }
-//
-//        if (responseClass != null) {
-//            return new Gson().fromJson(response.body(), responseClass);
-//        }
-//
-//        return null;
-//    }
-//
-//    private boolean isSuccessful(int status) {
-//        return status / 100 == 2;
-//    }
-//}
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+        var status = response.statusCode();
+        if (!isSuccessful(status)) {
+            var body = response.body();
+            if (body != null) {
+                throw ResponseException.fromJson(body);
+            }
+
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+        }
+
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
+    }
+}
 
 
 }
