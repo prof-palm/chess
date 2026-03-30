@@ -67,7 +67,7 @@ public class Service {
     }
 
 
-    public LoginResult loginService(LoginRequest request) throws BadRequestException, UnAuthorizedException, DataAccessException {
+    public LoginResult loginService(LoginRequest request) throws UnAuthorizedException, DataAccessException {
         try{if(!userDAO.contains(request.username())){
             throw new UnAuthorizedException();
         }

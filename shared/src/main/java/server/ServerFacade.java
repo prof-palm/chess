@@ -1,5 +1,6 @@
 package server;
 
+import Exceptions.ResponseException;
 import com.google.gson.Gson;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
@@ -24,42 +25,42 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public RegisterResult register(RegisterRequest request){
+    public RegisterResult register(RegisterRequest request) throws ResponseException{
         var httpRequest = buildRequest("POST", "/user", request);
         var response = sendRequest(httpRequest);
         return handleResponse(response, RegisterResult.class);
     }
 
-    public LoginResult login(LoginRequest request){
+    public LoginResult login(LoginRequest request)throws ResponseException{
         var httpRequest = buildRequest("POST", "/session", request);
         var response = sendRequest(httpRequest);
         return handleResponse(response, LoginResult.class);
     }
 
-    public void logout(String authToken){
+    public void logout(String authToken)throws ResponseException{
         var httpRequest = buildRequest("DELETE", "/session", authToken);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
     }
 
-    public ListGamesResult listGame(){
+    public ListGamesResult listGame()throws ResponseException{
         var httpRequest = buildRequest("GET", "/game", null);
         var response = sendRequest(httpRequest);
         return handleResponse(response, ListGamesResult.class);
     }
-    public CreateGameResult createGame(CreateGameRequest request){
+    public CreateGameResult createGame(CreateGameRequest request)throws ResponseException{
         var httpRequest = buildRequest("POST", "/game", request);
         var response = sendRequest(httpRequest);
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public void joinGame(JoinGameRequest request){
+    public void joinGame(JoinGameRequest request)throws ResponseException{
         var httpRequest = buildRequest("PUT", "/game", request);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
     }
 
-    public void clear(){
+    public void clear()throws ResponseException{
         var request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
     }
@@ -82,7 +83,6 @@ public class ServerFacade {
             return HttpRequest.BodyPublishers.noBody();
         }
     }
-
     private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -115,4 +115,5 @@ public class ServerFacade {
 }
 
 
-}
+
+
