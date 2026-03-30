@@ -1,13 +1,21 @@
 package ui;
 
+import Exceptions.ResponseException;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import results.LoginResult;
+import results.RegisterResult;
 import server.ServerFacade;
 
+import java.awt.*;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class PreLoginUI {
     private final ServerFacade server;
+    private State state = State.SIGNEDOUT;
 
 
 
@@ -36,18 +44,66 @@ public class PreLoginUI {
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_BLACK + ">>> " + SET_TEXT_COLOR_WHITE);
     }
+
+    public String eval(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "register" -> register(params);
+                case "login" -> login(params);
+                case "quit" -> "quit";
+                case "help" -> help();
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            return ex.getMessage();
+        }
+    }
+    //possible errors - invalid number of arguments, I will also, return exceptions kind of
+    public String register(String... params){
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
+        RegisterResult result =  server.register(new RegisterRequest(username, password, email));
+
+        //if valid, then I enter my postLoginUI
+    }
+    //possible errors - invalid number of arguments, unAuthorized,
+    public String login(String... params){
+        String username = params[0];
+        String password = params[1];
+        RegisterResult result = server.login(new LoginRequest(username, password));
+    }
+
+
+
+
+
+
+
+
+    public String help() {
+            return """
+                        register <USERNAME> <PASSWORD> <EMAIL>
+                        login <USERNAME> <PASSWORD>
+                        quit
+                        help
+                        
+                        """;
         }
 
 
 
 
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+

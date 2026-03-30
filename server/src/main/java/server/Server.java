@@ -133,13 +133,7 @@ public class Server {
             ctx.result(json);
 
         }
-        catch(BadRequestException ex){
-            ctx.status(400);
-            ExceptionMessage message = new ExceptionMessage("Error: Unauthorized");
-            String json = serializer.toJson(message);
-            ctx.result(json);
 
-        }
 
         catch(DataAccessException ex){
             ctx.status(500);
