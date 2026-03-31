@@ -1,6 +1,8 @@
 package ui;
 
 import Exceptions.ResponseException;
+import requests.CreateGameRequest;
+import requests.JoinGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
@@ -55,6 +57,8 @@ public class UserInterface {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "logout" -> logout();
+                case "create" -> createGame(params);
                 case "quit" -> "quit";
                 case "help" -> help();
                 default -> help();
@@ -90,6 +94,49 @@ public class UserInterface {
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
     }
+
+    public String logout()throws ResponseException{
+        assertSignedIn();
+        state = State.SIGNEDOUT;
+        authToken = null;
+        return "you have signed out";
+    }
+
+    public String createGame(String... params)throws ResponseException{
+        assertSignedIn();
+        if(params.length == 1){
+        server.createGame(new CreateGameRequest(params[0]), authToken);
+        return "game created";}
+
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <NAME>");
+    }
+
+    public String joinGame(String... params)throws ResponseException{
+        assertSignedIn();
+
+        //what if the ID entered is not an integer, handle that case
+        if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
+        try{
+        server.joinGame(new JoinGameRequest(params[0], Integer.valueOf(params[1])), authToken);
+        //code that displays chessboard
+        return String.format("You have joined %s game as %s", params[0], params[1]);
+        }
+        catch(NumberFormatException ex){
+            throw new ResponseException(ResponseException.Code.ClientError, "ID must be integer value");
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID> <WHITE|BLACK>");
+
+    }
+
+    public String listGames()throws ResponseException{
+        assertSignedIn();
+        server.listGame(authToken);
+
+    }
+
+
+
 
 
 
