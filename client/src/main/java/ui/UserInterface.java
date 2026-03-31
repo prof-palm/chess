@@ -15,6 +15,8 @@ import static ui.EscapeSequences.*;
 public class UserInterface {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    private String authToken = null;
+
 
 
 
@@ -68,6 +70,7 @@ public class UserInterface {
             String password = params[1];
             String email = params[2];
             RegisterResult result = server.register(new RegisterRequest(username, password, email));
+            authToken = result.authToken();
             return String.format("you have registered as %s", result.username());
 
         }
@@ -75,14 +78,14 @@ public class UserInterface {
 
 
 
-        //if valid, then I enter my postLoginUI
     }
-    //possible errors - invalid number of arguments, unAuthorized,
+    //possible errors - invalid number of arguments, unauthorized,
     public String login(String... params)throws ResponseException{
         if(params.length == 2){
         String username = params[0];
         String password = params[1];
         LoginResult result = server.login(new LoginRequest(username, password));
+        authToken = result.authToken();
         return String.format("you have signed in as %s", username);
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
@@ -96,14 +99,26 @@ public class UserInterface {
 
 
     public String help() {
+        if(state == State.SIGNEDOUT){
             return """
                         register <USERNAME> <PASSWORD> <EMAIL>
                         login <USERNAME> <PASSWORD>
                         quit
                         help
                         
-                        """;
+                        """;}
+            return """
+                    create <NAME>
+                    list
+                    join <ID>
+                    observe <ID>
+                    logout
+                    quit
+                    help
+                    """;
         }
+
+
 
 
 
