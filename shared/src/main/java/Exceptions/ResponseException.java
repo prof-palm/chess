@@ -1,6 +1,7 @@
 package Exceptions;
 
 import com.google.gson.Gson;
+import results.ExceptionMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,21 +24,24 @@ public class ResponseException extends Exception {
         return new Gson().toJson(Map.of("message", getMessage(), "status", code));
     }
 
-    public static ResponseException fromJson(String json) {
-        var map = new Gson().fromJson(json, HashMap.class);
-        var status = Code.valueOf(map.get("status").toString());
-        String message = map.get("message").toString();
-        return new ResponseException(status, message);
+    public static ResponseException fromJson(String json, Integer statusCode) {
+        var httpStatus = fromHttpStatusCode(statusCode);
+        var errorMessage = new Gson().fromJson(json, ExceptionMessage.class);
+        return new ResponseException(httpStatus, errorMessage.message());
     }
 
     public Code code() {
         return code;
     }
 
+
+
+    //Make cases for all different exceptions
     public static Code fromHttpStatusCode(int httpStatusCode) {
         return switch (httpStatusCode) {
             case 500 -> Code.ServerError;
-            case 400 -> Code.ClientError;
+            case 400, 403, 401 -> Code.ClientError;
+
             default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
         };
     }

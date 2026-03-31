@@ -7,20 +7,19 @@ import results.LoginResult;
 import results.RegisterResult;
 import server.ServerFacade;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class PreLoginUI {
+public class UserInterface {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
 
 
 
-    public PreLoginUI(String serverUrl) {
-        server = new ServerFacade(serverUrl);
+    public UserInterface(String url) {
+        server = new ServerFacade(url);
     }
 
     public void run(){
@@ -47,6 +46,7 @@ public class PreLoginUI {
 
     public String eval(String input) {
         try {
+            //I only want the initial token to be lowercase, so I have to change that.
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
@@ -62,19 +62,30 @@ public class PreLoginUI {
         }
     }
     //possible errors - invalid number of arguments, I will also, return exceptions kind of
-    public String register(String... params){
-        String username = params[0];
-        String password = params[1];
-        String email = params[2];
-        RegisterResult result =  server.register(new RegisterRequest(username, password, email));
+    public String register(String... params)throws ResponseException{
+        if(params.length == 3 ) {
+            String username = params[0];
+            String password = params[1];
+            String email = params[2];
+            RegisterResult result = server.register(new RegisterRequest(username, password, email));
+            return String.format("you have registered as %s", result.username());
+
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
+
+
 
         //if valid, then I enter my postLoginUI
     }
     //possible errors - invalid number of arguments, unAuthorized,
-    public String login(String... params){
+    public String login(String... params)throws ResponseException{
+        if(params.length == 2){
         String username = params[0];
         String password = params[1];
-        RegisterResult result = server.login(new LoginRequest(username, password));
+        LoginResult result = server.login(new LoginRequest(username, password));
+        return String.format("you have signed in as %s", username);
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
     }
 
 
@@ -96,7 +107,11 @@ public class PreLoginUI {
 
 
 
-
+    private void assertSignedIn() throws ResponseException {
+        if (state == State.SIGNEDOUT) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You must sign in");
+        }
+    }
 }
 
 

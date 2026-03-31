@@ -6,6 +6,13 @@ import dataaccess.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
+import requests.CreateGameRequest;
+import requests.JoinGameRequest;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import results.CreateGameResult;
+import results.LoginResult;
+import results.RegisterResult;
 import server.*;
 
 import javax.xml.crypto.Data;
@@ -110,7 +117,6 @@ class ServiceTest {
     }
 
 
-//not clearing properly due to invalid salt,this is due to it only being tested at service level, which does not store a hashed password
     @Test
     void clearServiceSuccess() throws AlreadyTakenException, BadRequestException, UnAuthorizedException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");
@@ -147,7 +153,6 @@ class ServiceTest {
 
 
     }
-//joinGameService is not right by itself.
     @Test
     void joinGameServiceSuccess() throws AlreadyTakenException, UnAuthorizedException, BadRequestException, DataAccessException {
         RegisterRequest request = new RegisterRequest("water", "water", "water");

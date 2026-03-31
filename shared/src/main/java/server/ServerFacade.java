@@ -23,6 +23,7 @@ public class ServerFacade {
 
     public ServerFacade(String url) {
         serverUrl = url;
+
     }
 
     public RegisterResult register(RegisterRequest request) throws ResponseException{
@@ -38,24 +39,24 @@ public class ServerFacade {
     }
 
     public void logout(String authToken)throws ResponseException{
-        var httpRequest = buildRequest("DELETE", "/session", authToken);
+        var httpRequest = buildRequest("DELETE", "/session", null, authToken);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
     }
 
-    public ListGamesResult listGame()throws ResponseException{
-        var httpRequest = buildRequest("GET", "/game", null);
+    public ListGamesResult listGame(String authToken)throws ResponseException{
+        var httpRequest = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(httpRequest);
         return handleResponse(response, ListGamesResult.class);
     }
-    public CreateGameResult createGame(CreateGameRequest request)throws ResponseException{
-        var httpRequest = buildRequest("POST", "/game", request);
+    public CreateGameResult createGame(CreateGameRequest request, String authToken)throws ResponseException{
+        var httpRequest = buildRequest("POST", "/game", request, authToken);
         var response = sendRequest(httpRequest);
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public void joinGame(JoinGameRequest request)throws ResponseException{
-        var httpRequest = buildRequest("PUT", "/game", request);
+    public void joinGame(JoinGameRequest request, String authToken)throws ResponseException{
+        var httpRequest = buildRequest("PUT", "/game", request, authToken);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
     }
@@ -64,12 +65,17 @@ public class ServerFacade {
         var request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
     }
+    private HttpRequest buildRequest(String method, String path, Object body){
+        return buildRequest(method, path, body, null);
+    }
 
-
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
+        if(authToken != null){
+            request.setHeader("authorization", authToken);
+        }
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
@@ -96,7 +102,7 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw ResponseException.fromJson(body);
+                throw ResponseException.fromJson(body, status);
             }
 
             throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
@@ -112,6 +118,7 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 }
 
 
