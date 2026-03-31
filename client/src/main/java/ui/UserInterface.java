@@ -1,16 +1,18 @@
 package ui;
 
 import Exceptions.ResponseException;
+import model.GameData;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
+import results.ListGamesResult;
 import results.LoginResult;
 import results.RegisterResult;
 import server.ServerFacade;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ui.EscapeSequences.*;
 
@@ -59,6 +61,9 @@ public class UserInterface {
                 case "login" -> login(params);
                 case "logout" -> logout();
                 case "create" -> createGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
+                case "list" -> listGames();
                 case "quit" -> "quit";
                 case "help" -> help();
                 default -> help();
@@ -67,6 +72,11 @@ public class UserInterface {
             return ex.getMessage();
         }
     }
+
+    private String observeGame(String[] params) {
+        return null;
+    }
+
     //possible errors - invalid number of arguments, I will also, return exceptions kind of
     public String register(String... params)throws ResponseException{
         if(params.length == 3 ) {
@@ -131,8 +141,20 @@ public class UserInterface {
 
     public String listGames()throws ResponseException{
         assertSignedIn();
-        server.listGame(authToken);
-
+        ListGamesResult object = server.listGame(authToken);
+        Collection<GameData> list = object.games();
+        ArrayList<GameInfoDisplay> gameInfoDisplay = new ArrayList<>();
+        int i = 1;
+        //so now I have a list of all the data, but I only want to print the gameName, and players, so I am going to add another method taht iterates and creates a new list
+        for(GameData game : list){
+            gameInfoDisplay.add(new GameInfoDisplay(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
+            i+=1;
+        }
+        //need to add for the case that the usernames are null, and handle those by providing a mapping opt
+        String result = gameInfoDisplay.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(",", "GamesInfo: [","]"));
+        return result;
     }
 
 
