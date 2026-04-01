@@ -13,6 +13,7 @@ import server.ServerFacade;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ui.EscapeSequences.*;
 
@@ -20,6 +21,8 @@ public class UserInterface {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken = null;
+    private ArrayList<GameInfoDisplay> globalList = new ArrayList<>();
+    private HashMap<Integer, Integer> idMapper = new HashMap<>();
 
 
 
@@ -53,7 +56,8 @@ public class UserInterface {
     public String eval(String input) {
         try {
             //I only want the initial token to be lowercase, so I have to change that.
-            String[] tokens = input.toLowerCase().split(" ");
+            String[] tokens = input.split(" ");
+            tokens[0] = tokens[0].toLowerCase();
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
@@ -73,8 +77,15 @@ public class UserInterface {
         }
     }
 
-    private String observeGame(String[] params) {
-        return null;
+    private String observeGame(String... params)throws ResponseException {
+        assertSignedIn();
+        if(params.length == 1){
+            if(idMapper.containsKey(Integer.valueOf(params[0])));
+            printboard();
+        }
+
+
+
     }
 
     //possible errors - invalid number of arguments, I will also, return exceptions kind of
@@ -123,11 +134,11 @@ public class UserInterface {
 
     public String joinGame(String... params)throws ResponseException{
         assertSignedIn();
-
+        //UI id
         //what if the ID entered is not an integer, handle that case
         if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
         try{
-        server.joinGame(new JoinGameRequest(params[0], Integer.valueOf(params[1])), authToken);
+        server.joinGame(new JoinGameRequest(params[0], idMapper.get(Integer.valueOf(params[1]))), authToken);
         //code that displays chessboard
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }
@@ -140,27 +151,28 @@ public class UserInterface {
     }
 
     public String listGames()throws ResponseException{
+        globalList.clear();
+        idMapper.clear();
         assertSignedIn();
         ListGamesResult object = server.listGame(authToken);
         Collection<GameData> list = object.games();
-        ArrayList<GameInfoDisplay> gameInfoDisplay = new ArrayList<>();
+
         int i = 1;
-        //so now I have a list of all the data, but I only want to print the gameName, and players, so I am going to add another method taht iterates and creates a new list
+        //so now I have a list of all the data, but I only want to print the gameName, and players, so I am going to add another method that iterates and creates a new list
         for(GameData game : list){
-            gameInfoDisplay.add(new GameInfoDisplay(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
+            globalList.add(new GameInfoDisplay(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
+            idMapper.put(i, game.gameID());
             i+=1;
         }
         //need to add for the case that the usernames are null, and handle those by providing a mapping opt
-        String result = gameInfoDisplay.stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(",", "GamesInfo: [","]"));
+        //need to ensure that the UI game ID is stored so that people Users can use it to join that game.
+        String result = globalList.stream()
+                .flatMap(gameInfoDisplay -> gameInfoDisplay == null
+                ? Stream.of("NoPlayer")
+                : Stream.of(String.valueOf(gameInfoDisplay.id()), gameInfoDisplay.gameName(), gameInfoDisplay.whiteUsername(), gameInfoDisplay.blackUsername()))
+                .collect(Collectors.joining(",", "GameInfo: [","]"));
         return result;
     }
-
-
-
-
-
 
 
 
@@ -179,7 +191,7 @@ public class UserInterface {
             return """
                     create <NAME>
                     list
-                    join <ID>
+                    join <ID> <WHITE|BLACK>
                     observe <ID>
                     logout
                     quit
