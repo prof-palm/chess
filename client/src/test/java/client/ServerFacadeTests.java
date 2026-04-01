@@ -8,7 +8,7 @@ import requests.LoginRequest;
 import requests.RegisterRequest;
 import results.ListGamesResult;
 import server.Server;
-import server.ServerFacade;
+import client.ServerFacade;
 
 import static org.junit.jupiter.api.Assertions.*;
 

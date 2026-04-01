@@ -1,7 +1,7 @@
-package server;
+package client;
 
-import exceptions.ResponseException;
 import com.google.gson.Gson;
+import exceptions.ResponseException;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import requests.LoginRequest;

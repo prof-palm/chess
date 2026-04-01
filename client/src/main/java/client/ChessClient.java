@@ -9,7 +9,7 @@ import requests.RegisterRequest;
 import results.ListGamesResult;
 import results.LoginResult;
 import results.RegisterResult;
-import server.ServerFacade;
+import client.ServerFacade;
 import ui.ChessBoardUI;
 
 import java.io.PrintStream;
@@ -24,7 +24,6 @@ public class ChessClient {
     private ArrayList<GameInfo> globalList = new ArrayList<>();
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
     private ChessBoardUI boardUI = new ChessBoardUI();
-    private PrintStream out;
 
 
 
