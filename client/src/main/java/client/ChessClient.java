@@ -85,7 +85,7 @@ public class ChessClient {
         assertSignedIn();
         if(params.length == 1){
             if(idMapper.containsKey(Integer.valueOf(params[0]))){;
-            boardUI.printBoard();
+            boardUI.printBoard("WHITE");
             }
         }
         return String.format("you have entered game %s", params[0]);
@@ -144,7 +144,7 @@ public class ChessClient {
         if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
         try{
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
-        //code that displays chessboard
+        boardUI.printBoard(params[1]);
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }
         catch(NumberFormatException ex){
