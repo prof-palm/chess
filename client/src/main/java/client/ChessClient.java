@@ -91,7 +91,6 @@ public class ChessClient {
         return String.format("you have entered game %s", params[0]);
     }
 
-    //possible errors - invalid number of arguments, I will also, return exceptions kind of
     public String register(String... params)throws ResponseException{
         if(params.length == 3 ) {
             String username = params[0];
