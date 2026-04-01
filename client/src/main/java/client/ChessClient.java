@@ -57,7 +57,6 @@ public class ChessClient {
 
     public String eval(String input) {
         try {
-            //I only want the initial token to be lowercase, so I have to change that.
             String[] tokens = input.split(" ");
             tokens[0] = tokens[0].toLowerCase();
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -105,7 +104,6 @@ public class ChessClient {
 
 
     }
-    //possible errors - invalid number of arguments, unauthorized,
     public String login(String... params)throws ResponseException{
         if(params.length == 2){
         String username = params[0];
