@@ -23,7 +23,7 @@ public class ChessClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken = null;
-    private ArrayList<GameInfoDisplay> globalList = new ArrayList<>();
+    private ArrayList<GameInfo> globalList = new ArrayList<>();
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
     private ChessBoardUI boardUI = new ChessBoardUI();
     private PrintStream out;
@@ -70,7 +70,7 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
-                //case "observe" -> observeGame(params);
+                case "observe" -> observeGame(params);
                 case "list" -> listGames();
                 case "quit" -> "quit";
                 case "help" -> help();
@@ -81,16 +81,15 @@ public class ChessClient {
         }
     }
 
-//    private String observeGame(String... params)throws ResponseException {
-//        assertSignedIn();
-//        if(params.length == 1){
-//            if(idMapper.containsKey(Integer.valueOf(params[0])));
-//            boardUI.printBoard(out);
-//        }
-//
-//
-//
-//    }
+    private String observeGame(String... params)throws ResponseException {
+        assertSignedIn();
+        if(params.length == 1){
+            if(idMapper.containsKey(Integer.valueOf(params[0]))){;
+            boardUI.printBoard();
+            }
+        }
+        return String.format("you have entered game %s", params[0]);
+    }
 
     //possible errors - invalid number of arguments, I will also, return exceptions kind of
     public String register(String... params)throws ResponseException{
@@ -166,17 +165,12 @@ public class ChessClient {
         int i = 1;
         //so now I have a list of all the data, but I only want to print the gameName, and players, so I am going to add another method that iterates and creates a new list
         for(GameData game : list){
-            globalList.add(new GameInfoDisplay(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
+            globalList.add(new GameInfo(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
             idMapper.put(i, game.gameID());
             i+=1;
         }
-        //need to add for the case that the usernames are null, and handle those by providing a mapping opt
-        //need to ensure that the UI game ID is stored so that people Users can use it to join that game.
         String result = globalList.stream()
-                .flatMap(gameInfoDisplay -> gameInfoDisplay == null
-                ? Stream.of("NoPlayer")
-                : Stream.of(String.valueOf(gameInfoDisplay.id()), gameInfoDisplay.gameName(), gameInfoDisplay.whiteUsername(), gameInfoDisplay.blackUsername()))
-                .collect(Collectors.joining(",", "GameInfo: [","]"));
+        .map(Object::toString).collect(Collectors.joining(",", "GameInfo: [","]"));
         return result;
     }
 

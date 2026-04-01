@@ -19,25 +19,26 @@ public class ChessBoardUI {
 
 
 
-    public void printBoard(PrintStream out) {
+    public void printBoard() {
 
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++) {
                 if ((row + col) % 2 == 0) {
-                    setWhiteSquare(out);
+                    System.out.print(SET_BG_COLOR_LIGHT_GREY);
                 } else {
-                    setBlackSquare(out);
+                    System.out.print(SET_BG_COLOR_BLACK);
                 }
                 ChessBoard board = game.getBoard();
                 ChessPiece piece = board.getPiece(new ChessPosition(row, col));
                 if(piece == null){
-                    out.print("   ");
+                    System.out.print("   ");
                 }
                 else{
-                    setPieceColor(out, piece);
-                    out.print(" " + piecePrint(piece) + " ");}
+                    setPieceColor(piece);
+                    System.out.print(" " + piecePrint(piece) + " ");}
 
             }
+            System.out.print(RESET_BG_COLOR);
             System.out.println();
         }
 
@@ -54,12 +55,12 @@ public class ChessBoardUI {
         };
     }
 
-    public void setPieceColor(PrintStream out, ChessPiece piece){
+    public void setPieceColor(ChessPiece piece){
         if(piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)){
-            out.print(SET_TEXT_COLOR_RED);
+            System.out.print(SET_TEXT_COLOR_RED);
         }
         else{
-            out.print(SET_TEXT_COLOR_BLUE);
+            System.out.print(SET_TEXT_COLOR_BLUE);
 
         }
     }
@@ -68,11 +69,11 @@ public class ChessBoardUI {
 
 
     private static void setWhiteSquare(PrintStream out) {
-        out.print(SET_BG_COLOR_LIGHT_GREY);
+        System.out.print(SET_BG_COLOR_LIGHT_GREY);
     }
 
     private static void setBlackSquare(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
+        System.out.print(SET_BG_COLOR_BLACK);
     }
 
 
