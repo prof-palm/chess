@@ -1,6 +1,4 @@
-package ui;
-
-import java.util.HashMap;
+package client;
 
 public record GameInfoDisplay(Integer id, String gameName, String whiteUsername, String blackUsername) {
 }

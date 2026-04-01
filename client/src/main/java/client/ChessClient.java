@@ -1,4 +1,4 @@
-package ui;
+package client;
 
 import Exceptions.ResponseException;
 import model.GameData;
@@ -10,24 +10,28 @@ import results.ListGamesResult;
 import results.LoginResult;
 import results.RegisterResult;
 import server.ServerFacade;
+import ui.ChessBoardUI;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ui.EscapeSequences.*;
 
-public class UserInterface {
+public class ChessClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken = null;
     private ArrayList<GameInfoDisplay> globalList = new ArrayList<>();
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
+    private ChessBoardUI boardUI = new ChessBoardUI();
+    private PrintStream out;
 
 
 
 
-    public UserInterface(String url) {
+    public ChessClient(String url) {
         server = new ServerFacade(url);
     }
 
@@ -66,7 +70,7 @@ public class UserInterface {
                 case "logout" -> logout();
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
-                case "observe" -> observeGame(params);
+                //case "observe" -> observeGame(params);
                 case "list" -> listGames();
                 case "quit" -> "quit";
                 case "help" -> help();
@@ -77,16 +81,16 @@ public class UserInterface {
         }
     }
 
-    private String observeGame(String... params)throws ResponseException {
-        assertSignedIn();
-        if(params.length == 1){
-            if(idMapper.containsKey(Integer.valueOf(params[0])));
-            printboard();
-        }
-
-
-
-    }
+//    private String observeGame(String... params)throws ResponseException {
+//        assertSignedIn();
+//        if(params.length == 1){
+//            if(idMapper.containsKey(Integer.valueOf(params[0])));
+//            boardUI.printBoard(out);
+//        }
+//
+//
+//
+//    }
 
     //possible errors - invalid number of arguments, I will also, return exceptions kind of
     public String register(String... params)throws ResponseException{
@@ -96,6 +100,7 @@ public class UserInterface {
             String email = params[2];
             RegisterResult result = server.register(new RegisterRequest(username, password, email));
             authToken = result.authToken();
+            state = State.SIGNEDIN;
             return String.format("you have registered as %s", result.username());
 
         }
@@ -111,6 +116,7 @@ public class UserInterface {
         String password = params[1];
         LoginResult result = server.login(new LoginRequest(username, password));
         authToken = result.authToken();
+            state = State.SIGNEDIN;
         return String.format("you have signed in as %s", username);
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
@@ -138,7 +144,7 @@ public class UserInterface {
         //what if the ID entered is not an integer, handle that case
         if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
         try{
-        server.joinGame(new JoinGameRequest(params[0], idMapper.get(Integer.valueOf(params[1]))), authToken);
+        server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
         //code that displays chessboard
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }
