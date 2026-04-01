@@ -1,6 +1,6 @@
 package client;
 
-import Exceptions.ResponseException;
+import exceptions.ResponseException;
 import model.GameData;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
@@ -14,8 +14,6 @@ import ui.ChessBoardUI;
 
 import java.io.PrintStream;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ui.EscapeSequences.*;
 

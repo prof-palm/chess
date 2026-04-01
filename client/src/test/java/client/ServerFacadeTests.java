@@ -1,13 +1,12 @@
 package client;
 
-import Exceptions.ResponseException;
+import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
 import results.ListGamesResult;
-import server.BadRequestException;
 import server.Server;
 import server.ServerFacade;
 
