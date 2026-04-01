@@ -26,11 +26,11 @@ public class ChessBoardUI {
         System.out.println();
         for (int row = 8; row > 0; row--) {
             printRowNumbers(printRow(row, perspective));
-            for (int col = 8; col > 0 ; col--) {
+            for (int col = 1; col < 9 ; col++) {
                 if ((row + col) % 2 == 0) {
-                    System.out.print(SET_BG_COLOR_LIGHT_GREY);
-                } else {
                     System.out.print(SET_BG_COLOR_BLACK);
+                } else {
+                    System.out.print(SET_BG_COLOR_LIGHT_GREY);
                 }
                 ChessBoard board = game.getBoard();
                 ChessPiece piece = board.getPiece(new ChessPosition(printRow(row, perspective), printCol(col, perspective)));

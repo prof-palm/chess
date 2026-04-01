@@ -54,7 +54,7 @@ public class ChessClient {
         System.out.println();
     }
     private void printPrompt() {
-        System.out.print("\n" + SET_TEXT_COLOR_BLACK + ">>> " + SET_TEXT_COLOR_WHITE);
+        System.out.print("\n" + SET_TEXT_COLOR_GREEN + ">>> " + SET_TEXT_COLOR_WHITE);
     }
 
     public String eval(String input) {
@@ -139,8 +139,6 @@ public class ChessClient {
 
     public String joinGame(String... params)throws ResponseException{
         assertSignedIn();
-        //UI id
-        //what if the ID entered is not an integer, handle that case
         if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
         try{
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
@@ -161,17 +159,21 @@ public class ChessClient {
         assertSignedIn();
         ListGamesResult object = server.listGame(authToken);
         Collection<GameData> list = object.games();
-
         int i = 1;
-        //so now I have a list of all the data, but I only want to print the gameName, and players, so I am going to add another method that iterates and creates a new list
+        StringBuilder builder = new StringBuilder(200);
         for(GameData game : list){
             globalList.add(new GameInfo(i, game.gameName(), game.whiteUsername(), game.blackUsername()));
             idMapper.put(i, game.gameID());
             i+=1;
         }
-        String result = globalList.stream()
-        .map(Object::toString).collect(Collectors.joining(",", "GameInfo: [","]"));
-        return result;
+        for(GameInfo info : globalList){
+             String resultString = String.format("Game id: %d Name: %s White: %s Black: %s \n", info.id(), info.gameName(),
+                    info.whiteUsername(), info.blackUsername());
+             builder.append(resultString);
+
+        }
+
+        return builder.toString();
     }
 
 
