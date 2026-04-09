@@ -1,9 +1,6 @@
 package websocket;
 
-import io.javalin.websocket.WsCloseHandler;
-import io.javalin.websocket.WsConnectHandler;
-import io.javalin.websocket.WsMessageContext;
-import io.javalin.websocket.WsMessageHandler;
+import io.javalin.websocket.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.UnAuthorizedException;
@@ -38,4 +35,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+    @Override
+    public void handleClose(@NotNull WsCloseContext wsCloseContext) throws Exception {
+
+    }
+
+    @Override
+    public void handleConnect(@NotNull WsConnectContext wsConnectContext) throws Exception {
+
+    }
 }

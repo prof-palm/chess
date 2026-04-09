@@ -18,6 +18,7 @@ import java.net.http.HttpResponse;
 
 
 import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -27,8 +28,9 @@ import java.net.URISyntaxException;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
-    private Session session;
+    private Session session = null;
     private MessageHandler messageHandler;
+
 
 
     public ServerFacade(String url){
@@ -87,11 +89,13 @@ public class ServerFacade {
         var response = sendRequest(httpRequest);
         return handleResponse(response, CreateGameResult.class);
     }
-
+    //need to modify this so that it sends a websocket request
     public void joinGame(JoinGameRequest request, String authToken)throws ResponseException{
         var httpRequest = buildRequest("PUT", "/game", request, authToken);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
+        connectToServer();
+
     }
 
     public void clear()throws ResponseException{
@@ -152,7 +156,34 @@ public class ServerFacade {
         return status / 100 == 2;
     }
 
+
+    public void connectToGame(String authToken, int gameID) {
+        new UserGameCommand(UserGameCommand.CommandType.CONNECT , authToken, gameID);
+    }
+
+    public void leave(String authToken, int gameID) {
+        new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID);
+    }
+    public void makeMove(String authToken, int gameID) {
+        new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID);
+    }
+
+    public void resign(String authToken, int gameID) {
+        new UserGameCommand(UserGameCommand.CommandType.RESIGN , authToken, gameID);
+    }
+
+
+    public void send(UserGameCommand command) throws IOException {
+        Gson serializer = new Gson();
+        session.getBasicRemote().sendText(serializer.toJson(command));
+    }
+
+
+    // This method must be overridden, but we don't have to do anything with it
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
 }
+
 
 
 
