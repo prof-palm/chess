@@ -80,11 +80,21 @@ public class ChessClient {
     private String observeGame(String... params)throws ResponseException {
         assertSignedIn();
         if(params.length == 1){
-            if(idMapper.containsKey(Integer.valueOf(params[0]))){;
+            if(idMapper.containsKey(Integer.valueOf(params[0]))){
             boardUI.printBoard("WHITE");
+            return String.format("you have entered game %s", params[0]);
+
+            }
+            else{
+                throw new ResponseException(ResponseException.Code.ClientError, "Enter valid game ID");
             }
         }
-        return String.format("you have entered game %s", params[0]);
+        else{
+            throw new ResponseException(ResponseException.Code.ClientError, "Expected <ID>");
+        }
+
+
+
     }
 
     public String register(String... params)throws ResponseException{
