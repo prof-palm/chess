@@ -11,6 +11,7 @@ import results.LoginResult;
 import results.RegisterResult;
 import client.ServerFacade;
 import ui.ChessBoardUI;
+import websocket.messages.ServerMessage;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -28,9 +29,19 @@ public class ChessClient {
 
 
 
-    public ChessClient(String url) {
+    public ChessClient(String url) throws ResponseException {
         server = new ServerFacade(url);
     }
+
+
+//    public void notify(ServerMessage message) {
+//        switch (message.getServerMessageType()) {
+//            case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
+//            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+//            case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
+//        }
+//    }
+
 
     public void run(){
         System.out.println("Welcome to 240 chess. Type Help to get started.");
@@ -194,6 +205,17 @@ public class ChessClient {
                         help
                         
                         """;}
+        if(state == State.WHITEPLAYER){
+            return """
+                    help
+                    redraw chessboard
+                    leave
+                    make move <START POSITION> <END POSITION>
+                    resign
+                    highlight moves
+                    """;
+
+        }
             return """
                     create <NAME>
                     list
