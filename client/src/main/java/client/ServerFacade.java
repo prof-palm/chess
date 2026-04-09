@@ -31,8 +31,12 @@ public class ServerFacade {
     private MessageHandler messageHandler;
 
 
-    public ServerFacade(String url) throws ResponseException{
+    public ServerFacade(String url){
         serverUrl = url;
+    }
+
+    public void connectToServer() throws ResponseException {
+        String url = serverUrl;
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
@@ -51,7 +55,6 @@ public class ServerFacade {
         } catch (DeploymentException | IOException | URISyntaxException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
-
     }
 
 

@@ -18,7 +18,7 @@ import java.util.*;
 
 import static ui.EscapeSequences.*;
 
-public class ChessClient {
+public class ChessClient implements MessageHandler {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken = null;
@@ -34,13 +34,13 @@ public class ChessClient {
     }
 
 
-//    public void notify(ServerMessage message) {
-//        switch (message.getServerMessageType()) {
-//            case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
-//            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
-//            case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
-//        }
-//    }
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
+            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+            case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
+        }
+    }
 
 
     public void run(){
@@ -81,12 +81,32 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "quit" -> "quit";
                 case "help" -> help();
+                case "resign" -> resign();
+                case "makeMove" -> makeMove(params);
+                case "leave" -> leave();
+                case "redrawBoard" -> redrawBoard();
+                case "highlightMoves" -> highlight(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
     }
+
+    public void resign(){
+
+    }
+    public void makeMove(String... params){
+
+    }
+    public void leave(){}
+
+    public void redrawBoard(){}
+
+    public void highlight(String params){
+
+    }
+
 
     private String observeGame(String... params)throws ResponseException {
         assertSignedIn();
@@ -158,8 +178,10 @@ public class ChessClient {
         try{
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
         boardUI.printBoard(params[1]);
+
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }
+
         catch(NumberFormatException ex){
             throw new ResponseException(ResponseException.Code.ClientError, "ID must be integer value");
             }

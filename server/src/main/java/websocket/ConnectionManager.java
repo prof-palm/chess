@@ -5,11 +5,12 @@ import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-//need to somehow get teh game ID of a given game, pass in the game when this is called?
+//need to somehow get the game ID of a given game, pass in the game when this is called?
 public class ConnectionManager {
-    public final ConcurrentHashMap<int, Session> connections = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
 
     public void add(Session session) {
         connections.put(GameData.gameID(), session);
