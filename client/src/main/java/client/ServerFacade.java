@@ -157,19 +157,23 @@ public class ServerFacade {
     }
 
 
-    public void connectToGame(String authToken, int gameID) {
-        new UserGameCommand(UserGameCommand.CommandType.CONNECT , authToken, gameID);
+    public void connectToGame(String authToken, int gameID)throws IOException {
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT , authToken, gameID);
+        send(command);
     }
 
-    public void leave(String authToken, int gameID) {
-        new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID);
+    public void leave(String authToken, int gameID)throws IOException {
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID);
+        send(command);
     }
-    public void makeMove(String authToken, int gameID) {
-        new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID);
+    public void makeMove(String authToken, int gameID) throws IOException{
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID);
+        send(command);
     }
 
-    public void resign(String authToken, int gameID) {
-        new UserGameCommand(UserGameCommand.CommandType.RESIGN , authToken, gameID);
+    public void resign(String authToken, int gameID) throws IOException{
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN , authToken, gameID);
+        send(command);
     }
 
 

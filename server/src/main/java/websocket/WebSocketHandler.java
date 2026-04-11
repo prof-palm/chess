@@ -11,7 +11,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
 
     public void handleMessage(@NotNull WsMessageContext wsMessageContext) throws Exception {
-        int gameId = -1;
         Session session = wsMessageContext.session;
 
         try {
