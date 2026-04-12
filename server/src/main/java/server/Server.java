@@ -11,6 +11,7 @@ import requests.LoginRequest;
 import requests.RegisterRequest;
 import results.*;
 import service.*;
+import websocket.WebSocketHandler;
 
 import java.util.Collection;
 
@@ -27,8 +28,7 @@ public class Server {
     public Server(Service service) {
 
         this.service = service;
-
-
+        WebSocketHandler wsHandler = new WebSocketHandler(this.service);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.post("user",this::register);
         javalin.post("session", this::login);
@@ -42,13 +42,17 @@ public class Server {
                 ctx.enableAutomaticPings();
                 System.out.println("Websocket connected");
             });
-            ws.onMessage(ctx -> ctx.send("Websocket response" + ctx.message()));
+            ws.onMessage(wsHandler::handleMessage);
             ws.onClose(_ -> System.out.println("Websocket closed"));
 
         }).start(8080);
 
 
     }
+
+
+
+
     private void register(Context ctx) {
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(ctx.body(), RegisterRequest.class);

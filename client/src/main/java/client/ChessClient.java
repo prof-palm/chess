@@ -92,8 +92,9 @@ public class ChessClient implements MessageHandler {
             return ex.getMessage();
         }
     }
-
+//all these method need a username and password passed in within my serverFacade
     public void resign(){
+
 
     }
     public void makeMove(String... params){
@@ -103,7 +104,7 @@ public class ChessClient implements MessageHandler {
 
     public void redrawBoard(){}
 
-    public void highlight(String params){
+    public void highlight(String... params){
 
     }
 
@@ -113,7 +114,10 @@ public class ChessClient implements MessageHandler {
         if(params.length == 1){
             if(idMapper.containsKey(Integer.valueOf(params[0]))){
             boardUI.printBoard("WHITE");
-            return String.format("you have entered game %s", params[0]);
+                server.connectToServer();
+                server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
+
+                return String.format("you have entered game %s", params[0]);
 
             }
             else{
@@ -178,6 +182,8 @@ public class ChessClient implements MessageHandler {
         try{
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
         boardUI.printBoard(params[1]);
+        server.connectToServer();
+        server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
 
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }

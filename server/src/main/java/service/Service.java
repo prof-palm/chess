@@ -13,6 +13,7 @@ import results.CreateGameResult;
 import results.LoginResult;
 import results.RegisterResult;
 import server.*;
+import websocket.WebSocketHandler;
 
 import java.util.*;
 
@@ -33,6 +34,18 @@ public class Service {
         userDAO = new UserDataAccessSQL();
         gameDAO = new GameDataAccessSQL();
 
+    }
+
+    public AuthDAO getAuthDAO() {
+        return authDAO;
+    }
+
+    public UserDAO getUserDAO() {
+        return userDAO;
+    }
+
+    public GameDAO getGameDAO() {
+        return gameDAO;
     }
 
     public  String generateToken() {
