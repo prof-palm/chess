@@ -25,6 +25,7 @@ public class ChessClient implements MessageHandler {
     private ArrayList<GameInfo> globalList = new ArrayList<>();
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
     private ChessBoardUI boardUI = new ChessBoardUI();
+    private Integer gameID = null;
 
 
 
@@ -92,20 +93,33 @@ public class ChessClient implements MessageHandler {
             return ex.getMessage();
         }
     }
-//all these method need a username and password passed in within my serverFacade
+//all these method need a username and gameID passed in within my serverFacade
     public void resign(){
+        assertInGame();
+
 
 
 
     }
     public void makeMove(String... params){
+        assertInGame();
+
+
 
     }
-    public void leave(){}
+    public void leave(){
+        assertInGame();
 
-    public void redrawBoard(){}
+    }
+
+    public void redrawBoard(){
+        assertInGame();
+
+    }
 
     public void highlight(String... params){
+        assertInGame();
+
 
     }
 
@@ -116,9 +130,9 @@ public class ChessClient implements MessageHandler {
             if(idMapper.containsKey(Integer.valueOf(params[0]))){
             boardUI.printBoard("WHITE");
                 server.connectToServer();
+                gameID = idMapper.get(Integer.valueOf(params[0]));
                 server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
-
-                return String.format("you have entered game %s", params[0]);
+                state = State.OBSERVER;
 
             }
             else{
@@ -184,7 +198,10 @@ public class ChessClient implements MessageHandler {
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
         boardUI.printBoard(params[1]);
         server.connectToServer();
-        server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
+        gameID = idMapper.get(Integer.valueOf(params[0]));
+        server.connectToGame(authToken, gameID);
+        state = State.PlAYER;
+
 
         return String.format("You have joined %s game as %s", params[0], params[1]);
         }
@@ -265,6 +282,18 @@ public class ChessClient implements MessageHandler {
             throw new ResponseException(ResponseException.Code.ClientError, "You must sign in");
         }
     }
+    private void assertInGame() throws ResponseException {
+        if (state == State.PlAYER) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You must join game as player");
+        }
+    }
+    private void assertObserver()throws ResponseException{
+        if (state == State.OBSERVER) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You must join game as player");
+        }
+    }
+
+
 }
 
 

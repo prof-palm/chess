@@ -3,7 +3,6 @@ package client;
 public enum State {
     SIGNEDOUT,
     SIGNEDIN,
-    WHITEPLAYER,
-    BLACKPLAYER,
+    PlAYER,
     OBSERVER
 }

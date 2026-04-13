@@ -19,7 +19,6 @@ import java.net.http.HttpResponse;
 
 
 import jakarta.websocket.*;
-import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -160,21 +159,21 @@ public class ServerFacade {
 
 
     public void connectToGame(String authToken, int gameID)throws IOException {
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT , authToken, gameID);
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT , authToken, gameID, null);
         send(command);
     }
 
     public void leave(String authToken, int gameID)throws IOException {
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID);
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID, null);
         send(command);
     }
     public void makeMove(String authToken, int gameID, ChessMove move) throws IOException{
-        UserGameCommand command = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID, move);
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID, move);
         send(command);
     }
 
     public void resign(String authToken, int gameID) throws IOException{
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN , authToken, gameID);
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN , authToken, gameID, null);
         send(command);
     }
 

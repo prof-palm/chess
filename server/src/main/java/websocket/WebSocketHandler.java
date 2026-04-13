@@ -1,20 +1,15 @@
 package websocket;
 
-import chess.ChessBoard;
 import chess.ChessGame;
-import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
-import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.Service;
 import service.UnAuthorizedException;
-import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -43,7 +38,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = service.getAuthDAO().getAuth(command.getAuthToken()).username();
             saveSession(gameId, session);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, (ConnectCommand) command, ctx, gameId);
+                case CONNECT -> connect(session, username, command, ctx, gameId);
                 case MAKE_MOVE -> makeMove(session, username, command, ctx, gameId);
                 case LEAVE -> leaveGame(session, username, command, ctx);
                 case RESIGN -> resign(session, username, command, ctx);
@@ -80,7 +75,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void makeMove(Session session, String username, MakeMoveCommand command, WsMessageContext ctx, int gameID){
+    public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
         try {
         GameData data = service.getGameDAO().getGame(gameID);
         ChessGame game = data.game();
@@ -93,7 +88,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
         ServerMessage moveNotification =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
         connections.broadcast(session, moveNotification, gameID);
-
         if(game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())){
             String checkMessage = "WHITE is in check";
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
@@ -130,12 +124,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ctx.send(checkNotification);
             connections.broadcast(session, checkNotification, gameID);
         }
-
-
-
-
-
-
         }
         catch(InvalidMoveException ie){
             ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move", null));
@@ -145,8 +133,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void leaveGame(Session session, String username, UserGameCommand command, WsMessageContext ctx){
+    public void leaveGame(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
+        try{
+        GameData data = service.getGameDAO().getGame(gameID);
+        if(username.equals(data.blackUsername())){
+            GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), null, data.gameName(), data.game());
+            service.getGameDAO().updateGame(updatedGame);
 
+
+        }
+        else if(username.equals(data.whiteUsername())){
+        GameData updatedGame = new GameData(data.gameID(), null, data.blackUsername(), data.gameName(), data.game());
+            service.getGameDAO().updateGame(updatedGame);
+        }
+        String message = String.format("%s has left the game", username);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
+        connections.broadcast(session, notification, gameID);
+    }
+        catch(DataAccessException | IOException dae){
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+        }
     }
 
 
