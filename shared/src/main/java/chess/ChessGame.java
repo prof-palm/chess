@@ -17,6 +17,7 @@ import java.util.Objects;
 public class ChessGame implements Cloneable {
     ChessBoard gameBoard = new ChessBoard();
     TeamColor teamTurn = TeamColor.WHITE;
+    GameState gameState = GameState.GAME_IN_PLAY;
 
 
     public ChessGame() {
@@ -46,6 +47,18 @@ public class ChessGame implements Cloneable {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+    public enum GameState{
+        GAME_IN_PLAY,
+        GAME_OVER
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
     }
 
     /**

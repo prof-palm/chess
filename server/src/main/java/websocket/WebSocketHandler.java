@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 import model.GameData;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.Service;
@@ -40,23 +41,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, command, ctx, gameId);
                 case MAKE_MOVE -> makeMove(session, username, command, ctx, gameId);
-                case LEAVE -> leaveGame(session, username, command, ctx);
-                case RESIGN -> resign(session, username, command, ctx);
+                case LEAVE -> leaveGame(session, username, command, ctx, gameId);
+                case RESIGN -> resign(session, username, command, ctx, gameId);
             }
         } catch (UnAuthorizedException ex) {
-            sendMessage(session, gameId, new ErrorMessage("Error: unauthorized"));
+            ServerMessage unauthorizedMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: unauthorized", null);
+            ctx.send(unauthorizedMessage);
         } catch (Exception ex) {
             ex.printStackTrace();
-            sendMessage(session, gameId, new ErrorMessage("Error: " + ex.getMessage()));
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + ex.getMessage(), null);
+            ctx.send(errorMessage);
         }
     }
     public void saveSession(int gameID, Session session){
         connections.add(gameID, session);
 
     }
-    //this should send a server message back, how do I do that with proper
-    //possible nullptr exception, should be handled
-    //command type might not be necessary
+
+
     public void connect(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) throws DataAccessException, IOException {
         GameData data = service.getGameDAO().getGame(gameID);
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", data.game());
@@ -74,7 +76,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
         }
     }
-
+    //NEED TO ADD THE USERNAMES OF WHO IS CHECK/CHECKMATED
     public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
         try {
         GameData data = service.getGameDAO().getGame(gameID);
@@ -147,10 +149,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             service.getGameDAO().updateGame(updatedGame);
         }
         String message = String.format("%s has left the game", username);
+        connections.remove(gameID, session);
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
         connections.broadcast(session, notification, gameID);
     }
         catch(DataAccessException | IOException dae){
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+        }
+    }
+    //Maybe I made a game state attribute to chessGame
+    public void resign(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
+        try {
+            GameData data = service.getGameDAO().getGame(gameID);
+            ChessGame game = data.game();
+            game.setGameState(ChessGame.GameState.GAME_OVER);
+            GameData updatedGame = new GameData(gameID, data.whiteUsername(), data.blackUsername(), data.gameName(), game);
+            service.getGameDAO().updateGame(updatedGame);
+            String resignMessageString = String.format("%s has resigned", username);
+            ServerMessage resignMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, resignMessageString, updatedGame.game());
+            ctx.send(resignMessage);
+            connections.broadcast(session, resignMessage, gameID);
+        } catch(DataAccessException | IOException dae){
             ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
         }
     }
