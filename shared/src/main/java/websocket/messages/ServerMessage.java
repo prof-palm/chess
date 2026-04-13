@@ -12,8 +12,8 @@ import java.util.Objects;
  */
 public class ServerMessage {
     ServerMessageType serverMessageType;
-    private String message;
-    private ChessGame game;
+    String message;
+    ChessGame game;
 
 
     public enum ServerMessageType {

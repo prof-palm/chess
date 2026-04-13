@@ -28,6 +28,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     //need to add methods for each of these
     //have an additional if stat
+    //what do I do with unauthorized exceptions? Nothing calls it.I think I can handle it earlier
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
         Session session = ctx.session;
 
@@ -44,9 +45,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEAVE -> leaveGame(session, username, command, ctx, gameId);
                 case RESIGN -> resign(session, username, command, ctx, gameId);
             }
-        } catch (UnAuthorizedException ex) {
-            ServerMessage unauthorizedMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: unauthorized", null);
-            ctx.send(unauthorizedMessage);
         } catch (Exception ex) {
             ex.printStackTrace();
             ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + ex.getMessage(), null);
@@ -59,7 +57,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
 
-    public void connect(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) throws DataAccessException, IOException {
+    public void connect(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) {
+        try{
         GameData data = service.getGameDAO().getGame(gameID);
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", data.game());
         ctx.send(message);
@@ -75,8 +74,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String broadcastMessage = String.format("%s has joined the game as OBSERVER", username);
             connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
         }
+
+    }catch(DataAccessException | IOException dae){
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
+        }
+
     }
-    //NEED TO ADD THE USERNAMES OF WHO IS CHECK/CHECKMATED
+
     public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
         try {
         GameData data = service.getGameDAO().getGame(gameID);
@@ -84,51 +88,51 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         game.makeMove(command.getMove());
         GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         service.getGameDAO().updateGame(updatedGame);
-        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
+        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", game);
         ctx.send(loadMessage);
         connections.broadcast(session, loadMessage, gameID);
         String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
         ServerMessage moveNotification =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
         connections.broadcast(session, moveNotification, gameID);
         if(game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())){
-            String checkMessage = "WHITE is in check";
+            String checkMessage = String.format("%s is in check", data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
             ctx.send(checkNotification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInCheck(ChessGame.TeamColor.BLACK, game.getBoard())){
-                String checkMessage = "BLACK is in check";
+                String checkMessage = String.format("%s is in check", data.blackUsername());
                 ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
                 ctx.send(checkNotification);
                 connections.broadcast(session, checkNotification, gameID);
             }
         else if(game.isInCheckmate(ChessGame.TeamColor.WHITE)){
-                String checkMessage = "WHITE is in CheckMate, BLACK WINS!";
+                String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
                 ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
                 ctx.send(checkNotification);
                 connections.broadcast(session, checkNotification, gameID);
             }
         else if(game.isInCheckmate(ChessGame.TeamColor.BLACK)){
-            String checkMessage = "BLACK is in CheckMate, WHITE WINS!";
+            String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
             ctx.send(checkNotification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInStalemate(ChessGame.TeamColor.BLACK)){
-            String checkMessage = "DRAW!";
+            String checkMessage = String.format("%s is in stalemate, DRAW!", data.blackUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
             ctx.send(checkNotification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInStalemate(ChessGame.TeamColor.WHITE)){
-            String checkMessage = "DRAW!";
+            String checkMessage = String.format("%s is in stalemate, DRAW!", data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
             ctx.send(checkNotification);
             connections.broadcast(session, checkNotification, gameID);
         }
         }
         catch(InvalidMoveException ie){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move", null));
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Invalid move", null));
         }
         catch(DataAccessException | IOException dae){
             ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
@@ -154,7 +158,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, notification, gameID);
     }
         catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
         }
     }
     //Maybe I made a game state attribute to chessGame
@@ -170,7 +174,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ctx.send(resignMessage);
             connections.broadcast(session, resignMessage, gameID);
         } catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
         }
     }
 

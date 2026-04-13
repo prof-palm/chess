@@ -13,6 +13,7 @@ import client.ServerFacade;
 import ui.ChessBoardUI;
 import websocket.messages.ServerMessage;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -89,30 +90,37 @@ public class ChessClient implements MessageHandler {
                 case "highlightMoves" -> highlight(params);
                 default -> help();
             };
-        } catch (ResponseException ex) {
+        } catch (ResponseException | IOException ex) {
             return ex.getMessage();
         }
     }
+//how does the display message get handled
 //all these method need a username and gameID passed in within my serverFacade
-    public void resign(){
+    public void resign() throws ResponseException {
+        assertInGame();
+        try{server.resign(authToken, gameID);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+
+    }
+    public void makeMove(String... params) throws ResponseException {
         assertInGame();
 
 
 
 
     }
-    public void makeMove(String... params){
-        assertInGame();
-
-
-
-    }
-    public void leave(){
+    public void leave() throws ResponseException {
         assertInGame();
 
     }
 
-    public void redrawBoard(){
+    public void redrawBoard() throws ResponseException {
         assertInGame();
 
     }
@@ -124,7 +132,7 @@ public class ChessClient implements MessageHandler {
     }
 
 
-    private String observeGame(String... params)throws ResponseException {
+    private String observeGame(String... params) throws ResponseException, IOException {
         assertSignedIn();
         if(params.length == 1){
             if(idMapper.containsKey(Integer.valueOf(params[0]))){
@@ -142,6 +150,7 @@ public class ChessClient implements MessageHandler {
         else{
             throw new ResponseException(ResponseException.Code.ClientError, "Expected <ID>");
         }
+
 
 
 
@@ -200,7 +209,7 @@ public class ChessClient implements MessageHandler {
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
         server.connectToGame(authToken, gameID);
-        state = State.PlAYER;
+        state = State.PLAYER;
 
 
         return String.format("You have joined %s game as %s", params[0], params[1]);
@@ -209,6 +218,9 @@ public class ChessClient implements MessageHandler {
         catch(NumberFormatException ex){
             throw new ResponseException(ResponseException.Code.ClientError, "ID must be integer value");
             }
+        catch (IOException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "IO exception");
+        }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID> <WHITE|BLACK>");
 
@@ -251,7 +263,7 @@ public class ChessClient implements MessageHandler {
                         help
                         
                         """;}
-        if(state == State.WHITEPLAYER){
+        if(state == State.PLAYER || state == State.OBSERVER){
             return """
                     help
                     redraw chessboard
@@ -283,8 +295,8 @@ public class ChessClient implements MessageHandler {
         }
     }
     private void assertInGame() throws ResponseException {
-        if (state == State.PlAYER) {
-            throw new ResponseException(ResponseException.Code.ClientError, "You must join game as player");
+        if (state != State.PLAYER || state != State.OBSERVER) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You must join game a game");
         }
     }
     private void assertObserver()throws ResponseException{
