@@ -1,5 +1,9 @@
 package websocket;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -10,6 +14,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.Service;
 import service.UnAuthorizedException;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -26,6 +31,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
     //need to add methods for each of these
+    //have an additional if stat
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
         Session session = ctx.session;
 
@@ -37,8 +43,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = service.getAuthDAO().getAuth(command.getAuthToken()).username();
             saveSession(gameId, session);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, command, ctx, gameId);
-                case MAKE_MOVE -> makeMove(session, username, command, ctx);
+                case CONNECT -> connect(session, username, (ConnectCommand) command, ctx, gameId);
+                case MAKE_MOVE -> makeMove(session, username, command, ctx, gameId);
+                //when calling makeMove, esure the command is deserialized once more.
                 case LEAVE -> leaveGame(session, username, command, ctx);
                 case RESIGN -> resign(session, username, command, ctx);
             }
@@ -54,7 +61,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
     //this should send a server message back, how do I do that with proper
-    //possible nullptr exception
+    //possible nullptr exception, should be handled
+    //command type might not be necessary
     public void connect(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) throws DataAccessException, IOException {
         GameData data = service.getGameDAO().getGame(gameID);
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", data.game());
@@ -72,6 +80,39 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
         }
     }
+
+    public void makeMove(Session session, String username, MakeMoveCommand command, WsMessageContext ctx, int gameID){
+        GameData data = service.getGameDAO().getGame(gameID);
+        ChessGame game = data.game();
+        try {
+            game.makeMove(command.getMove());
+        }
+        catch(InvalidMoveException ie){
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move", null));
+        }
+        GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
+        service.getGameDAO().updateGame(updatedGame);
+        String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
+        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, game);
+        ctx.send(loadMessage);
+        connections.broadcast(session, loadMessage, gameID);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
 
 
 

@@ -98,37 +98,28 @@ public class GameDataAccessSQL implements GameDAO{
         }
     }
 
-    public void updateGame(JoinGameRequest request, String username) throws DataAccessException{
+    public void updateGame(GameData data) throws DataAccessException{
         try(Connection conn = getConnection()){
-        if(request.playerColor().equals("WHITE")){
-            try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET whiteUsername=? WHERE gameID=?") ) {
-                updateRow.setString(1,username);
-                updateRow.setInt(2, request.gameID());
-                updateRow.executeUpdate();
-
-
-            } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage());
+            Gson serializer = new Gson();
+            String gameSerialized = serializer.toJson(data.game());
+            try(var statement = conn.prepareStatement(
+                    "UPDATE gameData SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?")) {
+                statement.setString(1, data.whiteUsername());
+                statement.setString(2, data.blackUsername());
+                statement.setString(3, data.gameName());
+                statement.setString(4, gameSerialized);
+                statement.setInt(5, data.gameID());
+                statement.executeUpdate();
             }
 
-        }
-        else{
-            try(PreparedStatement updateRow = conn.prepareStatement("UPDATE gameData SET blackUsername=? WHERE gameID=?") ) {
-                updateRow.setString(1,username);
-                updateRow.setInt(2, request.gameID());
-                updateRow.executeUpdate();
 
 
-            } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage());
-            }
 
-        }
-
-    } catch (SQLException sql) {
+        } catch (SQLException sql) {
             throw new DataAccessException(sql.getMessage());
         }
     }
+
 
 
 
@@ -150,4 +141,5 @@ public class GameDataAccessSQL implements GameDAO{
         }
 
     }
+
 }

@@ -180,7 +180,17 @@ public class Service {
             }
             else{
                 String username = authDAO.getAuth(authToken).username();
-                gameDAO.updateGame(request, username);
+                GameData oldGame = gameDAO.getGame(request.gameID());
+                GameData updatedGame;
+                if(request.playerColor().equals("WHITE")){
+                     updatedGame = new GameData(request.gameID(), username, oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
+
+                }
+                else {
+                     updatedGame = new GameData(request.gameID(), oldGame.whiteUsername(), username, oldGame.gameName(), oldGame.game());
+
+                }
+                gameDAO.updateGame(updatedGame);
 
             }
 

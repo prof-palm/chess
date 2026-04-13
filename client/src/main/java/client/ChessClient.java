@@ -96,6 +96,7 @@ public class ChessClient implements MessageHandler {
     public void resign(){
 
 
+
     }
     public void makeMove(String... params){
 

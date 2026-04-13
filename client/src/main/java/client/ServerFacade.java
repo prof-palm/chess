@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exceptions.ResponseException;
 import requests.CreateGameRequest;
@@ -18,6 +19,7 @@ import java.net.http.HttpResponse;
 
 
 import jakarta.websocket.*;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -166,8 +168,8 @@ public class ServerFacade {
         UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE , authToken, gameID);
         send(command);
     }
-    public void makeMove(String authToken, int gameID) throws IOException{
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID);
+    public void makeMove(String authToken, int gameID, ChessMove move) throws IOException{
+        UserGameCommand command = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE , authToken, gameID, move);
         send(command);
     }
 

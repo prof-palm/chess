@@ -47,26 +47,10 @@ public class GameDataAccess implements GameDAO {
     }
 
 
-    public void updateGame(JoinGameRequest request, String username){
-        GameData currentGame = getGame(request.gameID());
-        if(request.playerColor().equals("WHITE")){
-            GameData updatedGame = new GameData(request.gameID(), username, currentGame.blackUsername(), currentGame.gameName(), currentGame.game());
-            gameData.remove(request.gameID());
-            gameData.put(updatedGame.gameID(), updatedGame);
-        }
-        else {
-            GameData updatedGame = new GameData(request.gameID(), currentGame.whiteUsername(), username, currentGame.gameName(), currentGame.game());
-            gameData.remove(request.gameID());
-            gameData.put(updatedGame.gameID(), updatedGame);
-        }
-
-
-
-
-
-
+    public void updateGame(GameData data){
+        gameData.remove(data.gameID());
+        gameData.put(data.gameID(), data);
     }
-
 
 
 
