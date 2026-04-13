@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 import model.GameData;
 import requests.CreateGameRequest;
@@ -9,12 +10,10 @@ import requests.RegisterRequest;
 import results.ListGamesResult;
 import results.LoginResult;
 import results.RegisterResult;
-import client.ServerFacade;
 import ui.ChessBoardUI;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -25,7 +24,7 @@ public class ChessClient implements MessageHandler {
     private String authToken = null;
     private ArrayList<GameInfo> globalList = new ArrayList<>();
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
-    private ChessBoardUI boardUI = new ChessBoardUI();
+    private ChessBoardUI boardUI = new ChessBoardUI(new ChessGame());
     private Integer gameID = null;
 
 
@@ -35,12 +34,12 @@ public class ChessClient implements MessageHandler {
         server = new ServerFacade(url);
     }
 
-
+    //need to make methods for each of these.
     public void notify(ServerMessage message) {
         switch (message.getServerMessageType()) {
-            case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
-            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
-            case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
+            case NOTIFICATION -> displayNotification(message);
+            case ERROR -> displayError(message);
+            case LOAD_GAME -> loadGame(message);
         }
     }
 
@@ -66,14 +65,17 @@ public class ChessClient implements MessageHandler {
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_GREEN + ">>> " + SET_TEXT_COLOR_WHITE);
     }
-
+    //find out another switch statement, most won't return a string.
     public String eval(String input) {
         try {
             String[] tokens = input.split(" ");
             tokens[0] = tokens[0].toLowerCase();
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
+            if(cmd.equals("quit")){
+                return "quit";
+            }
+             switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
@@ -81,7 +83,6 @@ public class ChessClient implements MessageHandler {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "list" -> listGames();
-                case "quit" -> "quit";
                 case "help" -> help();
                 case "resign" -> resign();
                 case "makeMove" -> makeMove(params);
@@ -96,6 +97,7 @@ public class ChessClient implements MessageHandler {
     }
 //how does the display message get handled
 //all these method need a username and gameID passed in within my serverFacade
+    //how do I pass in the ServerMessage?
     public void resign() throws ResponseException {
         assertInGame();
         try{server.resign(authToken, gameID);
@@ -125,7 +127,7 @@ public class ChessClient implements MessageHandler {
 
     }
 
-    public void highlight(String... params){
+    public void highlight(String... params)throws ResponseException{
         assertInGame();
 
 
@@ -136,7 +138,7 @@ public class ChessClient implements MessageHandler {
         assertSignedIn();
         if(params.length == 1){
             if(idMapper.containsKey(Integer.valueOf(params[0]))){
-            boardUI.printBoard("WHITE");
+            boardUI.printBoard(state);
                 server.connectToServer();
                 gameID = idMapper.get(Integer.valueOf(params[0]));
                 server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
@@ -205,11 +207,17 @@ public class ChessClient implements MessageHandler {
         if(params.length == 2 && (params[1].equals("WHITE") || params[1].equals("BLACK"))){
         try{
         server.joinGame(new JoinGameRequest(params[1], idMapper.get(Integer.valueOf(params[0]))), authToken);
-        boardUI.printBoard(params[1]);
+        if(params[1].equals("WHITE")){
+            state = State.WHITEPLAYER;
+        }
+        else{
+            state = State.BLACKPLAYER;
+        }
+        boardUI.printBoard(state);
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
         server.connectToGame(authToken, gameID);
-        state = State.PLAYER;
+        state = State.WHITEPLAYER;
 
 
         return String.format("You have joined %s game as %s", params[0], params[1]);
@@ -249,7 +257,19 @@ public class ChessClient implements MessageHandler {
         return builder.toString();
     }
 
+    public void displayNotification(ServerMessage message){
+        System.out.print(message.getMessage());
 
+    }
+    public void displayError(ServerMessage message){
+        System.out.print(message.getMessage());
+    }
+    public void loadGame(ServerMessage message){
+        ChessGame game = message.getGame();
+        ChessBoardUI ui = new ChessBoardUI(game);
+        ui.printBoard(state);
+
+    }
 
 
 
@@ -263,7 +283,7 @@ public class ChessClient implements MessageHandler {
                         help
                         
                         """;}
-        if(state == State.PLAYER || state == State.OBSERVER){
+        if(state == State.WHITEPLAYER || state == State.OBSERVER || state == State.BLACKPLAYER){
             return """
                     help
                     redraw chessboard
@@ -295,7 +315,7 @@ public class ChessClient implements MessageHandler {
         }
     }
     private void assertInGame() throws ResponseException {
-        if (state != State.PLAYER || state != State.OBSERVER) {
+        if (state != State.WHITEPLAYER || state != State.OBSERVER || state != State.BLACKPLAYER) {
             throw new ResponseException(ResponseException.Code.ClientError, "You must join game a game");
         }
     }

@@ -4,8 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.State;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +13,17 @@ import static ui.EscapeSequences.*;
 
 
 public class ChessBoardUI {
-    private static final int BOARD_SIZE_IN_SQUARES = 8;
-    private static final int SQUARE_SIZE_IN_PADDED_CHARS = 2;
-    private static final int LINE_WIDTH_IN_PADDED_CHARS = 1;
-    private final ChessGame game = new ChessGame();
+    private final ChessGame game;
 
+    public ChessBoardUI(ChessGame game){
+        this.game = game;
+    }
 
+    public ChessGame getGame() {
+        return game;
+    }
 
-
-    public void printBoard(String perspective) {
+    public void printBoard(State perspective) {
         printHeaders(perspective);
         System.out.println();
         for (int row = 8; row > 0; row--) {
@@ -71,10 +73,10 @@ public class ChessBoardUI {
         }
     }
 
-    public void printHeaders(String perspective){
+    public void printHeaders(State perspective){
         System.out.print(SET_BG_COLOR_DARK_GREY);
         System.out.print(SET_TEXT_COLOR_WHITE);
-        if(perspective.equals("WHITE")){
+        if(perspective == State.WHITEPLAYER){
         List<String> headers = new ArrayList<>(List.of("a", "b", "c", "d", "e", "f", "g", "h"));
         printHeadersHelper(headers);
         }
@@ -104,7 +106,7 @@ public class ChessBoardUI {
     }
 
 
-    public int printRow(int row, String perspective){
+    public int printRow(int row, State perspective){
         if(perspective.equals("BLACK")){
             row = 9 - row;
             return row;
@@ -114,7 +116,7 @@ public class ChessBoardUI {
         }
 
     }
-    public int printCol(int col, String perspective){
+    public int printCol(int col, State perspective){
         if(perspective.equals("BLACK")){
             col = 9 - col;
             return col;

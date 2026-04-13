@@ -16,6 +16,7 @@ public class ServerMessage {
     ChessGame game;
 
 
+
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
@@ -28,8 +29,13 @@ public class ServerMessage {
         this.game = game;
     }
 
+    public String getMessage() {
+        return message;
+    }
 
-
+    public ChessGame getGame() {
+        return game;
+    }
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
