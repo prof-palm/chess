@@ -45,7 +45,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, (ConnectCommand) command, ctx, gameId);
                 case MAKE_MOVE -> makeMove(session, username, command, ctx, gameId);
-                //when calling makeMove, esure the command is deserialized once more.
                 case LEAVE -> leaveGame(session, username, command, ctx);
                 case RESIGN -> resign(session, username, command, ctx);
             }
@@ -82,33 +81,71 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void makeMove(Session session, String username, MakeMoveCommand command, WsMessageContext ctx, int gameID){
+        try {
         GameData data = service.getGameDAO().getGame(gameID);
         ChessGame game = data.game();
-        try {
-            game.makeMove(command.getMove());
+        game.makeMove(command.getMove());
+        GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
+        service.getGameDAO().updateGame(updatedGame);
+        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
+        ctx.send(loadMessage);
+        connections.broadcast(session, loadMessage, gameID);
+        String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
+        ServerMessage moveNotification =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
+        connections.broadcast(session, moveNotification, gameID);
+
+        if(game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())){
+            String checkMessage = "WHITE is in check";
+            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+            ctx.send(checkNotification);
+            connections.broadcast(session, checkNotification, gameID);
+        }
+        else if(game.isInCheck(ChessGame.TeamColor.BLACK, game.getBoard())){
+                String checkMessage = "BLACK is in check";
+                ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+                ctx.send(checkNotification);
+                connections.broadcast(session, checkNotification, gameID);
+            }
+        else if(game.isInCheckmate(ChessGame.TeamColor.WHITE)){
+                String checkMessage = "WHITE is in CheckMate, BLACK WINS!";
+                ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+                ctx.send(checkNotification);
+                connections.broadcast(session, checkNotification, gameID);
+            }
+        else if(game.isInCheckmate(ChessGame.TeamColor.BLACK)){
+            String checkMessage = "BLACK is in CheckMate, WHITE WINS!";
+            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+            ctx.send(checkNotification);
+            connections.broadcast(session, checkNotification, gameID);
+        }
+        else if(game.isInStalemate(ChessGame.TeamColor.BLACK)){
+            String checkMessage = "DRAW!";
+            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+            ctx.send(checkNotification);
+            connections.broadcast(session, checkNotification, gameID);
+        }
+        else if(game.isInStalemate(ChessGame.TeamColor.WHITE)){
+            String checkMessage = "DRAW!";
+            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
+            ctx.send(checkNotification);
+            connections.broadcast(session, checkNotification, gameID);
+        }
+
+
+
+
+
+
         }
         catch(InvalidMoveException ie){
             ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move", null));
         }
-        GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
-        service.getGameDAO().updateGame(updatedGame);
-        String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
-        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, game);
-        ctx.send(loadMessage);
-        connections.broadcast(session, loadMessage, gameID);
+        catch(DataAccessException | IOException dae){
+            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    public void leaveGame(Session session, String username, UserGameCommand command, WsMessageContext ctx){
 
     }
 
