@@ -45,7 +45,7 @@ public class Server {
             ws.onMessage(wsHandler::handleMessage);
             ws.onClose(_ -> System.out.println("Websocket closed"));
 
-        }).start(8080);
+        });
 
 
     }

@@ -31,9 +31,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     //what do I do with unauthorized exceptions? Nothing calls it.I think I can handle it earlier
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
         Session session = ctx.session;
-
+        Gson serializer = new Gson();
         try {
-            Gson serializer = new Gson();
             UserGameCommand command = serializer.fromJson(
                     ctx.message(), UserGameCommand.class);
             int gameId = command.getGameID();
@@ -48,7 +47,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } catch (Exception ex) {
             ex.printStackTrace();
             ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + ex.getMessage(), null);
-            ctx.send(errorMessage);
+            String json = serializer.toJson(errorMessage);
+            ctx.send(json);
         }
     }
     public void saveSession(int gameID, Session session){
@@ -58,10 +58,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
     public void connect(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) {
+        Gson serializer = new Gson();
         try{
         GameData data = service.getGameDAO().getGame(gameID);
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", data.game());
-        ctx.send(message);
+        String json = serializer.toJson(message);
+        ctx.send(json);
         if(data.blackUsername() != null && data.blackUsername().equals(username)){
             String broadcastMessage = String.format("%s has joined the game as BLACK", username);
             connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
@@ -76,12 +78,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
     }catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
+            ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null);
+            String json = serializer.toJson(message);
+            ctx.send(json);
         }
 
     }
 
     public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
+        Gson serializer = new Gson();
         try {
         GameData data = service.getGameDAO().getGame(gameID);
         ChessGame game = data.game();
@@ -89,7 +94,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         service.getGameDAO().updateGame(updatedGame);
         ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", game);
-        ctx.send(loadMessage);
+        String json = serializer.toJson(loadMessage);
+        ctx.send(json);
         connections.broadcast(session, loadMessage, gameID);
         String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
         ServerMessage moveNotification =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null);
@@ -97,49 +103,60 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if(game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())){
             String checkMessage = String.format("%s is in check", data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-            ctx.send(checkNotification);
+            String notification = serializer.toJson(checkNotification);
+            ctx.send(notification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInCheck(ChessGame.TeamColor.BLACK, game.getBoard())){
                 String checkMessage = String.format("%s is in check", data.blackUsername());
                 ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-                ctx.send(checkNotification);
+                String notification = serializer.toJson(checkNotification);
+                ctx.send(notification);
                 connections.broadcast(session, checkNotification, gameID);
             }
         else if(game.isInCheckmate(ChessGame.TeamColor.WHITE)){
                 String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
                 ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-                ctx.send(checkNotification);
+                String notification = serializer.toJson(checkNotification);
+                ctx.send(notification);
                 connections.broadcast(session, checkNotification, gameID);
             }
         else if(game.isInCheckmate(ChessGame.TeamColor.BLACK)){
             String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-            ctx.send(checkNotification);
+            String notification = serializer.toJson(checkNotification);
+            ctx.send(notification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInStalemate(ChessGame.TeamColor.BLACK)){
             String checkMessage = String.format("%s is in stalemate, DRAW!", data.blackUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-            ctx.send(checkNotification);
+            String notification = serializer.toJson(checkNotification);
+            ctx.send(notification);
             connections.broadcast(session, checkNotification, gameID);
         }
         else if(game.isInStalemate(ChessGame.TeamColor.WHITE)){
             String checkMessage = String.format("%s is in stalemate, DRAW!", data.whiteUsername());
             ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null);
-            ctx.send(checkNotification);
+            String notification = serializer.toJson(checkNotification);
+            ctx.send(notification);
             connections.broadcast(session, checkNotification, gameID);
         }
         }
         catch(InvalidMoveException ie){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Invalid move", null));
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Invalid move", null);
+            String notification = serializer.toJson(errorNotification);
+            ctx.send(notification);
         }
         catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null));
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, dae.getMessage(), null);
+            String notification = serializer.toJson(errorNotification);
+            ctx.send(notification);
         }
     }
 
     public void leaveGame(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
+        Gson serializer = new Gson();
         try{
         GameData data = service.getGameDAO().getGame(gameID);
         if(username.equals(data.blackUsername())){
@@ -158,11 +175,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, notification, gameID);
     }
         catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null);
+            String notification = serializer.toJson(errorNotification);
+            ctx.send(notification);
         }
     }
-    //Maybe I made a game state attribute to chessGame
     public void resign(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
+        Gson serializer = new Gson();
         try {
             GameData data = service.getGameDAO().getGame(gameID);
             ChessGame game = data.game();
@@ -171,10 +190,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             service.getGameDAO().updateGame(updatedGame);
             String resignMessageString = String.format("%s has resigned", username);
             ServerMessage resignMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, resignMessageString, updatedGame.game());
-            ctx.send(resignMessage);
+            String resignJson = serializer.toJson(resignMessage);
+            ctx.send(resignJson);
             connections.broadcast(session, resignMessage, gameID);
         } catch(DataAccessException | IOException dae){
-            ctx.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null));
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null);
+            String errorJson = serializer.toJson(errorMessage);
+            ctx.send(errorJson);
         }
     }
 

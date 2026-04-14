@@ -32,6 +32,7 @@ public class ConnectionManager {
         connections.get(gameID).remove(session);
     }
 
+    //change this, it needs to handle message Type and broadcast different things based on message types
     public void broadcast(Session excludeSession, ServerMessage message, Integer gameID) throws IOException {
         String msg = message.toString();
         for (Session c : connections.get(gameID)) {
