@@ -22,7 +22,8 @@ public class ConnectionManager {
         if(!connections.containsKey(gameID)){
             connections.put(gameID, new ArrayList<>());
         }
-            connections.get(gameID).add(session);
+        if(!connections.get(gameID).contains(session)){
+            connections.get(gameID).add(session);}
 
 
 

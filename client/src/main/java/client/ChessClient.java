@@ -139,6 +139,9 @@ public class ChessClient implements MessageHandler {
     //handle poor inputs, handle observer
     public void makeMove(String... params) throws ResponseException {
         assertInGame();
+        if(boardUI.getGame().getGameState() == ChessGame.GameState.GAME_OVER){
+            throw new ResponseException(ResponseException.Code.ClientError, "Game is over, no moves can be made");
+        }
         try{
         if(params.length == 5){
             int startCol;
@@ -291,7 +294,6 @@ public class ChessClient implements MessageHandler {
         boardUI.printBoard(state);
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
-        //need to check if the gameID is actually in the database
         server.connectToGame(authToken, gameID);
         state = State.WHITEPLAYER;
 

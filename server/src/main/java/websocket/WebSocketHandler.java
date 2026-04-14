@@ -92,9 +92,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
         Gson serializer = new Gson();
+
         try {
         GameData data = service.getGameDAO().getGame(gameID);
         ChessGame game = data.game();
+
         game.makeMove(command.getMove());
         GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         service.getGameDAO().updateGame(updatedGame);
