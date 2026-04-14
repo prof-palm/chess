@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 
-public class ServerFacade {
+public class ServerFacade extends Endpoint {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
     private Session session = null;
@@ -39,10 +39,10 @@ public class ServerFacade {
     }
 
     public void connectToServer() throws ResponseException {
-        String url = serverUrl;
+        String wsURL = serverUrl;
         try {
-            url = url.replace("http", "ws");
-            URI socketURI = new URI(url + "/ws");
+            wsURL = wsURL.replace("http", "ws");
+            URI socketURI = new URI(wsURL + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -95,7 +95,6 @@ public class ServerFacade {
         var httpRequest = buildRequest("PUT", "/game", request, authToken);
         var response = sendRequest(httpRequest);
         handleResponse(response, null);
-        connectToServer();
 
     }
 

@@ -43,7 +43,9 @@ public class ChessClient implements MessageHandler {
 
     public ChessClient(String url) throws ResponseException {
         server = new ServerFacade(url);
+        server.connectToServer();
     }
+
 
     //need to make methods for each of these.
     public void notify(ServerMessage message) {
@@ -64,12 +66,7 @@ public class ChessClient implements MessageHandler {
             printPrompt();
             String line = scanner.nextLine();
             try {
-                if(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER){
-                    evalGame(line);
-                }
-                else{
-                    result = eval(line);
-                }
+                eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
@@ -88,6 +85,7 @@ public class ChessClient implements MessageHandler {
             tokens[0] = tokens[0].toLowerCase();
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+
              return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
@@ -100,9 +98,11 @@ public class ChessClient implements MessageHandler {
                  case "help" -> help();
                 default -> help();
             };
+
         } catch (ResponseException | IOException ex) {
             return ex.getMessage();
         }
+
     }
 
     public void evalGame(String input) throws ResponseException {
@@ -324,10 +324,24 @@ public class ChessClient implements MessageHandler {
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
         server.connectToGame(authToken, gameID);
-        state = State.WHITEPLAYER;
-
-
+        if(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER) {
+            Scanner scanner = new Scanner(System.in);
+            var result = "";
+            while(!result.equals("quit")){
+                printPrompt();
+                String line = scanner.nextLine();
+                try {
+                    evalGame(line);
+                    System.out.print(SET_TEXT_COLOR_BLUE + result);
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
+            }
+            System.out.println();
+            }
         return String.format("You have joined %s game as %s", params[0], params[1]);
+
         }
 
         catch(NumberFormatException ex){
