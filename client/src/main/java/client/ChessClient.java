@@ -139,12 +139,24 @@ public class ChessClient implements MessageHandler {
     //handle poor inputs, handle observer
     public void makeMove(String... params) throws ResponseException {
         assertInGame();
-        int startCol = stringToInteger.get(params[0].toLowerCase());
-        int startRow = Integer.valueOf(params[1]);
-        int endCol = stringToInteger.get(params[2].toLowerCase());
-        int endRow = Integer.valueOf(params[3]);
+        try{
+        if(params.length == 5){
+            int startCol;
+            int endCol;
+            if(stringToInteger.containsKey(params[0].toLowerCase()) && stringToInteger.containsKey(params[2])){
+                 startCol = stringToInteger.get(params[0].toLowerCase());
+                 endCol = stringToInteger.get(params[2].toLowerCase());
+            }
+            else{
+                throw new ResponseException(ResponseException.Code.ClientError, "columns must be string value a-h");
+
+            }
+
+        int startRow = Integer.parseInt(params[1]);
+        int endRow = Integer.parseInt(params[3]);
         ChessPosition startPosition = new ChessPosition(startRow, startCol);
         ChessPosition endPosition = new ChessPosition(endRow, endCol);
+
         ChessPiece.PieceType piece = switch(params[4].toLowerCase()){
             case "rook" -> ChessPiece.PieceType.ROOK;
             case "queen" -> ChessPiece.PieceType.QUEEN;
@@ -158,6 +170,15 @@ public class ChessClient implements MessageHandler {
             server.makeMove(authToken, gameID, move);
         } catch (IOException e) {
             throw new ResponseException(ResponseException.Code.ServerError, "AAHHH!");
+        }
+        }
+        else{
+            throw new ResponseException(ResponseException.Code.ClientError, "Expected: START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>");
+
+        }
+        }catch(NumberFormatException exe){
+            throw new ResponseException(ResponseException.Code.ClientError, "row entries must be integer values 1-8");
+
         }
 
 
@@ -369,7 +390,7 @@ public class ChessClient implements MessageHandler {
         }
     }
     private void assertInGame() throws ResponseException {
-        if (state != State.WHITEPLAYER || state != State.OBSERVER || state != State.BLACKPLAYER) {
+        if (state != State.WHITEPLAYER ||  state != State.BLACKPLAYER) {
             throw new ResponseException(ResponseException.Code.ClientError, "You must join a game");
         }
     }
