@@ -96,7 +96,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
         GameData data = service.getGameDAO().getGame(gameID);
         ChessGame game = data.game();
-
+        if(game.getGameState() == ChessGame.GameState.GAME_OVER){
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Game is finished" , null);
+            String notification = serializer.toJson(errorNotification);
+            ctx.send(notification);
+        }
+        else{
         game.makeMove(command.getMove());
         GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         service.getGameDAO().updateGame(updatedGame);
@@ -150,6 +155,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.broadcast(session, checkNotification, gameID);
         }
         }
+        }
         catch(InvalidMoveException ie){
             ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Invalid move", null);
             String notification = serializer.toJson(errorNotification);
@@ -194,11 +200,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
     //the updated game field, GAME_OVER has to be changed on client end
+    //okay I literally set the game state to game over, so I have to check it on the pre-updated game.
     public void resign(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
         Gson serializer = new Gson();
         try {
             GameData data = service.getGameDAO().getGame(gameID);
             ChessGame game = data.game();
+            if(data.game().getGameState() == ChessGame.GameState.GAME_OVER){
+                String message = "game is over";
+                ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, message, null);
+                String error = serializer.toJson(errorMessage);
+                ctx.send(error);
+            }
+            else{
             game.setGameState(ChessGame.GameState.GAME_OVER);
             GameData updatedGame = new GameData(gameID, data.whiteUsername(), data.blackUsername(), data.gameName(), game);
             service.getGameDAO().updateGame(updatedGame);
@@ -206,7 +220,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ServerMessage resignMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, resignMessageString, null, null);
             String resignJson = serializer.toJson(resignMessage);
             ctx.send(resignJson);
-            connections.broadcast(session, resignMessage, gameID);
+            connections.broadcast(session, resignMessage, gameID);}
         } catch(DataAccessException | IOException dae){
             ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: " + dae.getMessage(), null);
             String errorJson = serializer.toJson(errorMessage);
