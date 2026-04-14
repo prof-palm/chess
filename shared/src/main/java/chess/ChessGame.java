@@ -98,7 +98,6 @@ public class ChessGame implements Cloneable {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        //need to see if moves is within valid moves collection.
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         Collection<ChessMove> validMoveList = validMoves(start);

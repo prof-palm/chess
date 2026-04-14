@@ -26,9 +26,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
 
-    //need to add methods for each of these
-    //have an additional if stat
-    //what do I do with unauthorized exceptions? Nothing calls it.I think I can handle it earlier
+
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
         Session session = ctx.session;
         Gson serializer = new Gson();

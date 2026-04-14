@@ -124,10 +124,6 @@ public class ChessClient implements MessageHandler {
         }
     }
 
-
-//how does the display message get handled
-//all these method need a username and gameID passed in within my serverFacade
-    //how do I pass in the ServerMessage?
     public void resign() throws ResponseException {
         assertInGame();
         try{server.resign(authToken, gameID);
@@ -136,7 +132,6 @@ public class ChessClient implements MessageHandler {
         }
     }
 
-    //handle poor inputs, handle observer
     public void makeMove(String... params) throws ResponseException {
         assertInGame();
         if(boardUI.getGame().getGameState() == ChessGame.GameState.GAME_OVER){
@@ -154,7 +149,9 @@ public class ChessClient implements MessageHandler {
                 throw new ResponseException(ResponseException.Code.ClientError, "columns must be string value a-h");
 
             }
-
+        if(!stringToInteger.containsValue(Integer.parseInt(params[1])) || !stringToInteger.containsValue(Integer.parseInt(params[3]))){
+            throw new ResponseException(ResponseException.Code.ClientError, "row entries must be integer values 1-8");
+        }
         int startRow = Integer.parseInt(params[1]);
         int endRow = Integer.parseInt(params[3]);
         ChessPosition startPosition = new ChessPosition(startRow, startCol);
@@ -211,6 +208,38 @@ public class ChessClient implements MessageHandler {
 
     public void highlight(String... params)throws ResponseException{
         assertInGame();
+        int startCol;
+        int startRow;
+        if(stringToInteger.containsKey(params[0].toLowerCase())){
+            startCol = stringToInteger.get(params[0].toLowerCase());
+        }
+        else{
+            throw new ResponseException(ResponseException.Code.ClientError, "columns must be string value a-h");
+        }
+        try{
+        if(!stringToInteger.containsValue(Integer.parseInt(params[1]))){
+            throw new ResponseException(ResponseException.Code.ClientError, "row entries must be integer values 1-8");
+        }
+        else{
+            startRow = Integer.parseInt(params[1]);
+        }
+            ChessPosition position = new ChessPosition(startRow, startCol);
+            Collection<ChessMove> moves = boardUI.getGame().validMoves(position);
+            ArrayList<ChessPosition> endPositions = new ArrayList<>();
+            for(ChessMove move : moves){
+                endPositions.add(move.getEndPosition());
+            }
+            boardUI.printBoard(state, endPositions);
+        }catch(NumberFormatException nfe){
+            throw new ResponseException(ResponseException.Code.ClientError, "row entries must be integer values 1-8");
+        }
+
+
+
+
+
+
+
 
 
     }
@@ -368,7 +397,7 @@ public class ChessClient implements MessageHandler {
                     leave
                     makeMove START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>
                     resign
-                    highlight moves
+                    highlight moves POSITION(<column> <row>)
                     """;
 
         }
@@ -393,7 +422,7 @@ public class ChessClient implements MessageHandler {
         }
     }
     private void assertInGame() throws ResponseException {
-        if (state != State.WHITEPLAYER ||  state != State.BLACKPLAYER) {
+        if (state != State.WHITEPLAYER ||  state != State.BLACKPLAYER || state != State.OBSERVER) {
             throw new ResponseException(ResponseException.Code.ClientError, "You must join a game");
         }
     }

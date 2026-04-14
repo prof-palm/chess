@@ -1,12 +1,10 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.State;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ui.EscapeSequences.*;
@@ -124,6 +122,41 @@ public class ChessBoardUI {
         else{
             return col;
         }
+    }
+    //this is going to be very similar to print board, however, I have to return the valid moves given a position
+    public void printBoard(State perspective, Collection<ChessPosition> validEndPositions){
+        printHeaders(perspective);
+        System.out.println();
+        for (int row = 8; row > 0; row--) {
+            printRowNumbers(printRow(row, perspective));
+            for (int col = 1; col < 9 ; col++) {
+                if ((row + col) % 2 == 0) {
+                    System.out.print(SET_BG_COLOR_BLACK);
+                }
+                else if (validEndPositions.contains(new ChessPosition(row, col))){
+                  System.out.print(SET_BG_COLOR_YELLOW);
+                }
+                else {
+                    System.out.print(SET_BG_COLOR_LIGHT_GREY);
+                }
+                ChessBoard board = game.getBoard();
+                ChessPiece piece = board.getPiece(new ChessPosition(printRow(row, perspective), printCol(col, perspective)));
+                if(piece == null){
+                    System.out.print("   ");
+                }
+                else{
+                    setPieceColor(piece);
+                    System.out.print(" " + piecePrint(piece) + " ");}
+
+            }
+            printRowNumbers(printRow(row, perspective));
+            System.out.print(RESET_BG_COLOR);
+            System.out.println();
+        }
+        printHeaders(perspective);
+
+
+
     }
 
 }

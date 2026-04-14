@@ -30,7 +30,8 @@ public class ServerFacadeTests {
         facade.clear();
     }
     @AfterAll
-    static void stopServer() {
+    static void stopServer() throws ResponseException {
+        facade.clear();
         server.stop();
     }
 
