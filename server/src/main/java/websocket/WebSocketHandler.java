@@ -90,78 +90,88 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID){
+    public void makeMove(Session session, String username, UserGameCommand command, WsMessageContext ctx, int gameID) {
         Gson serializer = new Gson();
-
         try {
-        GameData data = service.getGameDAO().getGame(gameID);
-        ChessGame game = data.game();
-        if(game.getGameState() == ChessGame.GameState.GAME_OVER){
-            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Game is finished" , null);
-            String notification = serializer.toJson(errorNotification);
-            ctx.send(notification);
-        }
-        else{
-        game.makeMove(command.getMove());
-        GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
-        service.getGameDAO().updateGame(updatedGame);
-        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, game);
-        String json = serializer.toJson(loadMessage);
-        ctx.send(json);
-        connections.broadcast(session, loadMessage, gameID);
-        String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
-        ServerMessage moveNotification =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, null);
-        connections.broadcast(session, moveNotification, gameID);
-        if(game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())){
-            String checkMessage = String.format("%s is in check", data.whiteUsername());
-            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-            String notification = serializer.toJson(checkNotification);
-            ctx.send(notification);
-            connections.broadcast(session, checkNotification, gameID);
-        }
-        else if(game.isInCheck(ChessGame.TeamColor.BLACK, game.getBoard())){
-                String checkMessage = String.format("%s is in check", data.blackUsername());
-                ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-                String notification = serializer.toJson(checkNotification);
+            GameData data = service.getGameDAO().getGame(gameID);
+            ChessGame game = data.game();
+            if (game.getGameState() == ChessGame.GameState.GAME_OVER) {
+                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Game is finished", null);
+                String notification = serializer.toJson(errorNotification);
                 ctx.send(notification);
-                connections.broadcast(session, checkNotification, gameID);
-            }
-        else if(game.isInCheckmate(ChessGame.TeamColor.WHITE)){
-                String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
-                ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-                String notification = serializer.toJson(checkNotification);
+            } else if (!username.equals(data.whiteUsername()) && !username.equals(data.blackUsername())) {
+                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: only players can make moves", null);
+                String notification = serializer.toJson(errorNotification);
                 ctx.send(notification);
-                connections.broadcast(session, checkNotification, gameID);
+
             }
-        else if(game.isInCheckmate(ChessGame.TeamColor.BLACK)){
-            String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
-            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-            String notification = serializer.toJson(checkNotification);
-            ctx.send(notification);
-            connections.broadcast(session, checkNotification, gameID);
+            else {
+                ChessGame.TeamColor teamColor;
+                if (data.whiteUsername().equals(username)) {
+                    teamColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    teamColor = ChessGame.TeamColor.BLACK;
+                }
+                if (game.getBoard().getPiece(command.getMove().getStartPosition()).getTeamColor() != teamColor) {
+                    ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Invalid move", null);
+                    String notification = serializer.toJson(errorNotification);
+                    ctx.send(notification);
+                }
+                else{
+                game.makeMove(command.getMove());
+                GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
+                service.getGameDAO().updateGame(updatedGame);
+                ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, game);
+                String json = serializer.toJson(loadMessage);
+                ctx.send(json);
+                connections.broadcast(session, loadMessage, gameID);
+                String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
+                ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, null);
+                connections.broadcast(session, moveNotification, gameID);
+                if (game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())) {
+                    String checkMessage = String.format("%s is in check", data.whiteUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                } else if (game.isInCheck(ChessGame.TeamColor.BLACK, game.getBoard())) {
+                    String checkMessage = String.format("%s is in check", data.blackUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                } else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                    String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                    String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                } else if (game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                    String checkMessage = String.format("%s is in stalemate, DRAW!", data.blackUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                } else if (game.isInStalemate(ChessGame.TeamColor.WHITE)) {
+                    String checkMessage = String.format("%s is in stalemate, DRAW!", data.whiteUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                }
+            }
         }
-        else if(game.isInStalemate(ChessGame.TeamColor.BLACK)){
-            String checkMessage = String.format("%s is in stalemate, DRAW!", data.blackUsername());
-            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-            String notification = serializer.toJson(checkNotification);
-            ctx.send(notification);
-            connections.broadcast(session, checkNotification, gameID);
-        }
-        else if(game.isInStalemate(ChessGame.TeamColor.WHITE)){
-            String checkMessage = String.format("%s is in stalemate, DRAW!", data.whiteUsername());
-            ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-            String notification = serializer.toJson(checkNotification);
-            ctx.send(notification);
-            connections.broadcast(session, checkNotification, gameID);
-        }
-        }
-        }
-        catch(InvalidMoveException ie){
+        } catch (InvalidMoveException ie) {
             ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Invalid move", null);
             String notification = serializer.toJson(errorNotification);
             ctx.send(notification);
-        }
-        catch(DataAccessException | IOException dae){
+        } catch (DataAccessException | IOException dae) {
             ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error:" + dae.getMessage(), null);
             String notification = serializer.toJson(errorNotification);
             ctx.send(notification);
@@ -211,6 +221,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, message, null);
                 String error = serializer.toJson(errorMessage);
                 ctx.send(error);
+            }
+            else if(!username.equals(data.whiteUsername()) && !username.equals(data.blackUsername())){
+                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: only players can resign" , null);
+                String notification = serializer.toJson(errorNotification);
+                ctx.send(notification);
+
             }
             else{
             game.setGameState(ChessGame.GameState.GAME_OVER);

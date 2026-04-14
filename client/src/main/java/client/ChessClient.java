@@ -397,11 +397,6 @@ public class ChessClient implements MessageHandler {
             throw new ResponseException(ResponseException.Code.ClientError, "You must join a game");
         }
     }
-    private void assertObserver()throws ResponseException{
-        if (state == State.OBSERVER) {
-            throw new ResponseException(ResponseException.Code.ClientError, "You must join game as player");
-        }
     }
 
 
-}
