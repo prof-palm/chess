@@ -291,6 +291,7 @@ public class ChessClient implements MessageHandler {
         boardUI.printBoard(state);
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
+        //need to check if the gameID is actually in the database
         server.connectToGame(authToken, gameID);
         state = State.WHITEPLAYER;
 

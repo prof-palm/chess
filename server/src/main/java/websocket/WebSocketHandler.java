@@ -61,20 +61,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         Gson serializer = new Gson();
         try{
         GameData data = service.getGameDAO().getGame(gameID);
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", data.game());
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, data.game());
         String json = serializer.toJson(message);
         ctx.send(json);
         if(data.blackUsername() != null && data.blackUsername().equals(username)){
             String broadcastMessage = String.format("%s has joined the game as BLACK", username);
-            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
+            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, null), gameID);
         }
         else if (data.whiteUsername() != null && data.whiteUsername().equals(username)){
             String broadcastMessage = String.format("%s has joined the game as WHITE", username);
-            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
+            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, null), gameID);
         }
         else{
             String broadcastMessage = String.format("%s has joined the game as OBSERVER", username);
-            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, data.game()), gameID);
+            connections.broadcast(session, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, broadcastMessage, null), gameID);
         }
 
     }catch(DataAccessException | IOException dae){
@@ -82,6 +82,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String json = serializer.toJson(message);
             ctx.send(json);
         }
+    catch(NullPointerException npe){
+        ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Game not Found", null);
+        String errorJson = serializer.toJson(errorMessage);
+        ctx.send(errorJson);
+    }
 
     }
 
@@ -93,7 +98,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         game.makeMove(command.getMove());
         GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         service.getGameDAO().updateGame(updatedGame);
-        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "loading game...", game);
+        ServerMessage loadMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
         String json = serializer.toJson(loadMessage);
         ctx.send(json);
         connections.broadcast(session, loadMessage, gameID);
@@ -179,7 +184,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String notification = serializer.toJson(errorNotification);
             ctx.send(notification);
         }
+        catch(NullPointerException npe){
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Game not Found", null);
+            String errorJson = serializer.toJson(errorMessage);
+            ctx.send(errorJson);
+        }
+
     }
+    //the updated game field, GAME_OVER has to be changed on client end
     public void resign(Session session, String username, UserGameCommand command, WsMessageContext ctx, Integer gameID){
         Gson serializer = new Gson();
         try {
@@ -189,12 +201,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             GameData updatedGame = new GameData(gameID, data.whiteUsername(), data.blackUsername(), data.gameName(), game);
             service.getGameDAO().updateGame(updatedGame);
             String resignMessageString = String.format("%s has resigned", username);
-            ServerMessage resignMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, resignMessageString, updatedGame.game());
+            ServerMessage resignMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, resignMessageString, null);
             String resignJson = serializer.toJson(resignMessage);
             ctx.send(resignJson);
             connections.broadcast(session, resignMessage, gameID);
         } catch(DataAccessException | IOException dae){
             ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + dae.getMessage(), null);
+            String errorJson = serializer.toJson(errorMessage);
+            ctx.send(errorJson);
+        }
+        catch(NullPointerException npe){
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Game not Found", null);
             String errorJson = serializer.toJson(errorMessage);
             ctx.send(errorJson);
         }

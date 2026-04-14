@@ -1,5 +1,6 @@
 package websocket;
 
+import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
@@ -34,7 +35,8 @@ public class ConnectionManager {
 
     //change this, it needs to handle message Type and broadcast different things based on message types
     public void broadcast(Session excludeSession, ServerMessage message, Integer gameID) throws IOException {
-        String msg = message.toString();
+        Gson serializer = new Gson();
+        String msg = serializer.toJson(message);
         for (Session c : connections.get(gameID)) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
