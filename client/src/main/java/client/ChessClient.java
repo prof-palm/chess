@@ -81,7 +81,7 @@ public class ChessClient implements MessageHandler {
         System.out.println();
     }
     private void printPrompt() {
-        System.out.println(" ");
+        System.out.print("\n");
         System.out.print("\n" + SET_TEXT_COLOR_GREEN + ">>> " + SET_TEXT_COLOR_WHITE);
     }
 
@@ -124,6 +124,7 @@ public class ChessClient implements MessageHandler {
             case "redraw_board" -> redrawBoard();
             case "highlight_moves" -> highlight(params);
             case "help" -> System.out.print(help());
+            default -> System.out.print(help());
         }
         }catch (ResponseException ex) {
             throw new ResponseException(ResponseException.Code.ClientError, ex.getMessage());
@@ -190,7 +191,7 @@ public class ChessClient implements MessageHandler {
         }
         }
         else{
-            throw new ResponseException(ResponseException.Code.ClientError, "Expected: START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>");
+            System.out.print( "Expected: START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>");
 
         }
         }catch(NumberFormatException exe){
@@ -408,15 +409,18 @@ public class ChessClient implements MessageHandler {
     }
 
     public void displayNotification(ServerMessage message){
-
         System.out.println(message.getMessage());
+        printPrompt();
 
     }
     public void displayError(ServerMessage message){
         System.out.println(message.getErrorMessage());
+        printPrompt();
+
     }
     public void loadGame(ServerMessage message){
         ChessGame game = message.getGame();
+        System.out.print("\n");
         boardUI = new ChessBoardUI(game);
         boardUI.printBoard(state);
         printPrompt();
@@ -441,7 +445,7 @@ public class ChessClient implements MessageHandler {
                     
                     redraw_board
                     leave
-                    make_move START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>
+                    make_move START POSITION(<column> <row>) END POSITION (<column row>) PROMOTION <pieceType>
                     resign
                     highlight_moves POSITION(<column> <row>)
                     """;

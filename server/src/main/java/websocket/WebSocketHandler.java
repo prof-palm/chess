@@ -136,11 +136,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String json = serializer.toJson(loadMessage);
                 ctx.send(json);
                 connections.broadcast(session, loadMessage, gameID);
-                String rowStart = integerToString.get(command.getMove().getStartPosition().getRow());
-                String colStart = String.valueOf(command.getMove().getStartPosition().getColumn());
-                String rowEnd = integerToString.get(command.getMove().getEndPosition().getRow());
-                String colEnd = String.valueOf(command.getMove().getEndPosition().getColumn());
-                String message = String.format("%s moved from %s%s to %s%s", username, rowStart, colStart, rowEnd, colEnd);
+                String rowStart = String.valueOf(command.getMove().getStartPosition().getRow());
+                String colStart = integerToString.get(command.getMove().getStartPosition().getColumn());
+                String rowEnd = String.valueOf((command.getMove().getEndPosition().getRow()));
+                String colEnd = integerToString.get(command.getMove().getEndPosition().getColumn());
+
+                String message = String.format("%s moved from %s%s to %s%s", username, colStart, rowStart, colEnd, rowEnd);
                 ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, null);
                 connections.broadcast(session, moveNotification, gameID);
                 if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
