@@ -15,11 +15,24 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Map;
+
+import static java.util.Map.entry;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
     private final Service service;
+    private final Map<Integer, String> integerToString = Map.ofEntries(
+            entry(1, "a"),
+            entry(2, "b"),
+            entry(3, "c"),
+            entry(4, "d"),
+            entry(5, "e"),
+            entry(6, "f"),
+            entry(7, "g"),
+            entry(8, "h")
+    );
 
     public WebSocketHandler(Service service){
         this.service = service;
@@ -123,10 +136,28 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String json = serializer.toJson(loadMessage);
                 ctx.send(json);
                 connections.broadcast(session, loadMessage, gameID);
-                String message = String.format("%s moved from %s to %s", username, command.getMove().getStartPosition(), command.getMove().getEndPosition());
+                String rowStart = integerToString.get(command.getMove().getStartPosition().getRow());
+                String colStart = String.valueOf(command.getMove().getStartPosition().getColumn());
+                String rowEnd = integerToString.get(command.getMove().getEndPosition().getRow());
+                String colEnd = String.valueOf(command.getMove().getEndPosition().getColumn());
+                String message = String.format("%s moved from %s%s to %s%s", username, rowStart, colStart, rowEnd, colEnd);
                 ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, null);
                 connections.broadcast(session, moveNotification, gameID);
-                if (game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())) {
+                if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                        String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
+                        ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                        String notification = serializer.toJson(checkNotification);
+                        ctx.send(notification);
+                        connections.broadcast(session, checkNotification, gameID);
+                    }
+                else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                    String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
+                    String notification = serializer.toJson(checkNotification);
+                    ctx.send(notification);
+                    connections.broadcast(session, checkNotification, gameID);
+                }
+                else if (game.isInCheck(ChessGame.TeamColor.WHITE, game.getBoard())) {
                     String checkMessage = String.format("%s is in check", data.whiteUsername());
                     ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
                     String notification = serializer.toJson(checkNotification);
@@ -138,19 +169,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     String notification = serializer.toJson(checkNotification);
                     ctx.send(notification);
                     connections.broadcast(session, checkNotification, gameID);
-                } else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                    String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.whiteUsername(), data.blackUsername());
-                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-                    String notification = serializer.toJson(checkNotification);
-                    ctx.send(notification);
-                    connections.broadcast(session, checkNotification, gameID);
-                } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                    String checkMessage = String.format("%s is in CheckMate, %s WINS!", data.blackUsername(), data.whiteUsername());
-                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
-                    String notification = serializer.toJson(checkNotification);
-                    ctx.send(notification);
-                    connections.broadcast(session, checkNotification, gameID);
-                } else if (game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                }  else if (game.isInStalemate(ChessGame.TeamColor.BLACK)) {
                     String checkMessage = String.format("%s is in stalemate, DRAW!", data.blackUsername());
                     ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, null);
                     String notification = serializer.toJson(checkNotification);
