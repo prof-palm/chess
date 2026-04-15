@@ -74,7 +74,7 @@ public class ChessBoardUI {
     public void printHeaders(State perspective){
         System.out.print(SET_BG_COLOR_DARK_GREY);
         System.out.print(SET_TEXT_COLOR_WHITE);
-        if(perspective == State.WHITEPLAYER){
+        if(perspective == State.WHITEPLAYER || perspective == State.OBSERVER){
         List<String> headers = new ArrayList<>(List.of("a", "b", "c", "d", "e", "f", "g", "h"));
         printHeadersHelper(headers);
         }
@@ -105,7 +105,7 @@ public class ChessBoardUI {
 
 
     public int printRow(int row, State perspective){
-        if(perspective.equals("BLACK")){
+        if(perspective == State.BLACKPLAYER){
             row = 9 - row;
             return row;
         }
@@ -115,7 +115,7 @@ public class ChessBoardUI {
 
     }
     public int printCol(int col, State perspective){
-        if(perspective.equals("BLACK")){
+        if(perspective == State.BLACKPLAYER){
             col = 9 - col;
             return col;
         }
@@ -130,12 +130,13 @@ public class ChessBoardUI {
         for (int row = 8; row > 0; row--) {
             printRowNumbers(printRow(row, perspective));
             for (int col = 1; col < 9 ; col++) {
-                if ((row + col) % 2 == 0) {
+                if (validEndPositions.contains(new ChessPosition(printRow(row, perspective), printCol(col, perspective)))){
+                    System.out.print(SET_BG_COLOR_YELLOW);
+                }
+                else if ((row + col) % 2 == 0) {
                     System.out.print(SET_BG_COLOR_BLACK);
                 }
-                else if (validEndPositions.contains(new ChessPosition(row, col))){
-                  System.out.print(SET_BG_COLOR_YELLOW);
-                }
+
                 else {
                     System.out.print(SET_BG_COLOR_LIGHT_GREY);
                 }

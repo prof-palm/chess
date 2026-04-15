@@ -245,34 +245,29 @@ public class ChessClient implements MessageHandler {
             ChessPosition position = new ChessPosition(startRow, startCol);
             Collection<ChessMove> moves = boardUI.getGame().validMoves(position);
             ArrayList<ChessPosition> endPositions = new ArrayList<>();
+            if( moves == null || moves.isEmpty()){
+                boardUI.printBoard(state);
+            }else{
             for(ChessMove move : moves){
                 endPositions.add(move.getEndPosition());
+            }
             }
             boardUI.printBoard(state, endPositions);
         }catch(NumberFormatException nfe){
             throw new ResponseException(ResponseException.Code.ClientError, "row entries must be integer values 1-8");
         }
-
-
-
-
-
-
-
-
-
     }
 
 
     private String observeGame(String... params) throws ResponseException, IOException {
         assertSignedIn();
         if(params.length == 1){
+            state = State.OBSERVER;
             if(idMapper.containsKey(Integer.valueOf(params[0]))){
             boardUI.printBoard(state);
                 server.connectToServer();
                 gameID = idMapper.get(Integer.valueOf(params[0]));
                 server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
-                state = State.OBSERVER;
                 if(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER) {
                     System.out.print(help());
                     Scanner scanner = new Scanner(System.in);
@@ -418,7 +413,7 @@ public class ChessClient implements MessageHandler {
 
     }
     public void displayError(ServerMessage message){
-        System.out.println(message.getMessage());
+        System.out.println(message.getErrorMessage());
     }
     public void loadGame(ServerMessage message){
         ChessGame game = message.getGame();
