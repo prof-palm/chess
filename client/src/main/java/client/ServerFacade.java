@@ -34,8 +34,9 @@ public class ServerFacade extends Endpoint {
 
 
 
-    public ServerFacade(String url){
+    public ServerFacade(String url, MessageHandler messageHandler){
         serverUrl = url;
+        this.messageHandler = messageHandler;
     }
 
     public void connectToServer() throws ResponseException {

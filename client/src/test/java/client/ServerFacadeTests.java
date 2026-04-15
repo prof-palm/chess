@@ -9,21 +9,28 @@ import requests.RegisterRequest;
 import results.ListGamesResult;
 import server.Server;
 import client.ServerFacade;
+import websocket.messages.ServerMessage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class ServerFacadeTests {
+public class ServerFacadeTests implements MessageHandler {
 
     private static Server server;
     static ServerFacade facade;
+    static MessageHandler messageHandler = new MessageHandler() {
+        @Override
+        public void notify(ServerMessage message) {
+
+        }
+    };
 
     @BeforeAll
     public static void init() throws ResponseException {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade("http://localhost:" + port);
+        facade = new ServerFacade("http://localhost:" + port, messageHandler);
     }
     @BeforeEach
     public void clearDatabase() throws Exception{
@@ -125,4 +132,8 @@ public class ServerFacadeTests {
 
     }
 
+    @Override
+    public void notify(ServerMessage message) {
+
+    }
 }

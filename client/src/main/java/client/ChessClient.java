@@ -27,6 +27,17 @@ public class ChessClient implements MessageHandler {
     private HashMap<Integer, Integer> idMapper = new HashMap<>();
     private ChessBoardUI boardUI = new ChessBoardUI(new ChessGame());
     private Integer gameID = null;
+    MessageHandler messageHandler = new MessageHandler() {
+        @Override
+        public void notify(ServerMessage message) {
+            switch (message.getServerMessageType()) {
+                case NOTIFICATION -> displayNotification(message);
+                case ERROR -> displayError(message);
+                case LOAD_GAME -> loadGame(message);
+            }
+
+        }
+    };
     private final Map<String, Integer> stringToInteger = Map.ofEntries(
             entry("a", 1),
             entry("b", 2),
@@ -42,19 +53,13 @@ public class ChessClient implements MessageHandler {
 
 
     public ChessClient(String url) throws ResponseException {
-        server = new ServerFacade(url);
+        server = new ServerFacade(url, messageHandler);
         server.connectToServer();
     }
 
 
     //need to make methods for each of these.
-    public void notify(ServerMessage message) {
-        switch (message.getServerMessageType()) {
-            case NOTIFICATION -> displayNotification(message);
-            case ERROR -> displayError(message);
-            case LOAD_GAME -> loadGame(message);
-        }
-    }
+
 
 
     public void run(){
@@ -66,7 +71,7 @@ public class ChessClient implements MessageHandler {
             printPrompt();
             String line = scanner.nextLine();
             try {
-                eval(line);
+                result = eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
@@ -76,6 +81,7 @@ public class ChessClient implements MessageHandler {
         System.out.println();
     }
     private void printPrompt() {
+        System.out.println(" ");
         System.out.print("\n" + SET_TEXT_COLOR_GREEN + ">>> " + SET_TEXT_COLOR_WHITE);
     }
 
@@ -95,7 +101,7 @@ public class ChessClient implements MessageHandler {
                 case "observe" -> observeGame(params);
                 case "list" -> listGames();
                 case "quit" ->  "quit";
-                 case "help" -> help();
+                case "help" -> help();
                 default -> help();
             };
 
@@ -113,11 +119,11 @@ public class ChessClient implements MessageHandler {
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
         switch(cmd) {
             case "resign" -> resign();
-            case "makeMove" -> makeMove(params);
+            case "make_move" -> makeMove(params);
             case "leave" -> leave();
-            case "redrawBoard" -> redrawBoard();
-            case "highlightMoves" -> highlight(params);
-            case "help" -> help();
+            case "redraw_board" -> redrawBoard();
+            case "highlight_moves" -> highlight(params);
+            case "help" -> System.out.print(help());
         }
         }catch (ResponseException ex) {
             throw new ResponseException(ResponseException.Code.ClientError, ex.getMessage());
@@ -134,6 +140,7 @@ public class ChessClient implements MessageHandler {
 
     public void makeMove(String... params) throws ResponseException {
         assertInGame();
+
         if(boardUI.getGame().getGameState() == ChessGame.GameState.GAME_OVER){
             throw new ResponseException(ResponseException.Code.ClientError, "Game is over, no moves can be made");
         }
@@ -158,6 +165,7 @@ public class ChessClient implements MessageHandler {
         ChessPosition endPosition = new ChessPosition(endRow, endCol);
 
         ChessPiece.PieceType piece = switch(params[4].toLowerCase()){
+            case "none" -> null;
             case "rook" -> ChessPiece.PieceType.ROOK;
             case "queen" -> ChessPiece.PieceType.QUEEN;
             case "bishop" -> ChessPiece.PieceType.BISHOP;
@@ -202,6 +210,8 @@ public class ChessClient implements MessageHandler {
     public void redrawBoard() throws ResponseException {
         assertInGame();
         boardUI.printBoard(state);
+        System.out.println(" ");
+
 
 
     }
@@ -254,6 +264,21 @@ public class ChessClient implements MessageHandler {
                 gameID = idMapper.get(Integer.valueOf(params[0]));
                 server.connectToGame(authToken, idMapper.get(Integer.valueOf(params[0])));
                 state = State.OBSERVER;
+                if(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER) {
+                    System.out.print(help());
+                    Scanner scanner = new Scanner(System.in);
+                    while(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER){
+                        printPrompt();
+                        String line = scanner.nextLine();
+                        try {
+                            evalGame(line);
+                        } catch (Throwable e) {
+                            var msg = e.toString();
+                            System.out.print(msg);
+                        }
+                    }
+                    System.out.println();
+                }
                 return " ";
 
             }
@@ -320,27 +345,27 @@ public class ChessClient implements MessageHandler {
         else{
             state = State.BLACKPLAYER;
         }
-        boardUI.printBoard(state);
         server.connectToServer();
         gameID = idMapper.get(Integer.valueOf(params[0]));
         server.connectToGame(authToken, gameID);
-        if(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER) {
-            Scanner scanner = new Scanner(System.in);
-            var result = "";
-            while(!result.equals("quit")){
+
+        while(state == State.WHITEPLAYER || state == State.BLACKPLAYER || state == State.OBSERVER){
                 printPrompt();
+                System.out.println(' ');
+                Scanner scanner = new Scanner(System.in);
                 String line = scanner.nextLine();
                 try {
                     evalGame(line);
-                    System.out.print(SET_TEXT_COLOR_BLUE + result);
+                    System.out.print(SET_TEXT_COLOR_BLUE);
                 } catch (Throwable e) {
                     var msg = e.toString();
                     System.out.print(msg);
                 }
             }
             System.out.println();
-            }
-        return String.format("You have joined %s game as %s", params[0], params[1]);
+
+        return "  ";
+
 
         }
 
@@ -379,16 +404,18 @@ public class ChessClient implements MessageHandler {
     }
 
     public void displayNotification(ServerMessage message){
-        System.out.print(message.getMessage());
+
+        System.out.println(message.getMessage());
 
     }
     public void displayError(ServerMessage message){
-        System.out.print(message.getMessage());
+        System.out.println(message.getMessage());
     }
     public void loadGame(ServerMessage message){
         ChessGame game = message.getGame();
         boardUI = new ChessBoardUI(game);
         boardUI.printBoard(state);
+        printPrompt();
 
     }
 
@@ -406,12 +433,13 @@ public class ChessClient implements MessageHandler {
                         """;}
         if(state == State.WHITEPLAYER || state == State.OBSERVER || state == State.BLACKPLAYER){
             return """
-                    help
-                    redraw chessboard
+                    
+                    
+                    redraw_board
                     leave
-                    makeMove START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>
+                    make_move START POSITION(<column> <row>) END POSITION (<letter number>) PROMOTION <pieceType>
                     resign
-                    highlight moves POSITION(<column> <row>)
+                    highlight_moves POSITION(<column> <row>)
                     """;
 
         }
@@ -436,10 +464,19 @@ public class ChessClient implements MessageHandler {
         }
     }
     private void assertInGame() throws ResponseException {
-        if (state != State.WHITEPLAYER ||  state != State.BLACKPLAYER || state != State.OBSERVER) {
+        if (state != State.WHITEPLAYER &&  state != State.BLACKPLAYER && state != State.OBSERVER) {
             throw new ResponseException(ResponseException.Code.ClientError, "You must join a game");
         }
     }
+
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case NOTIFICATION -> displayNotification(message);
+            case ERROR -> displayError(message);
+            case LOAD_GAME -> loadGame(message);
+        }
     }
+}
 
 

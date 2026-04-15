@@ -183,8 +183,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if(username.equals(data.blackUsername())){
             GameData updatedGame = new GameData(data.gameID(), data.whiteUsername(), null, data.gameName(), data.game());
             service.getGameDAO().updateGame(updatedGame);
-
-
         }
         else if(username.equals(data.whiteUsername())){
         GameData updatedGame = new GameData(data.gameID(), null, data.blackUsername(), data.gameName(), data.game());
