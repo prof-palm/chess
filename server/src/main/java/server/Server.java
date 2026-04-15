@@ -43,7 +43,7 @@ public class Server {
                 System.out.println("Websocket connected");
             });
             ws.onMessage(wsHandler::handleMessage);
-            ws.onClose(_ -> System.out.println("Websocket closed"));
+            ws.onClose(w -> System.out.println("Websocket closed"));
 
         });
 
