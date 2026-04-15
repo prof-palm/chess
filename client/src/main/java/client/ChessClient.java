@@ -132,15 +132,24 @@ public class ChessClient implements MessageHandler {
 
     public void resign() throws ResponseException {
         assertInGame();
+        System.out.println("are you sure? Y/N");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        if(line.equals("Y")){
         try{server.resign(authToken, gameID);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }else if(line.equals("N")){
+            System.out.println("game still in play");
+        }
+        else{
+            throw new ResponseException(ResponseException.Code.ClientError, "EXPECTED Y/N");
         }
     }
 
     public void makeMove(String... params) throws ResponseException {
         assertInGame();
-
         if(boardUI.getGame().getGameState() == ChessGame.GameState.GAME_OVER){
             throw new ResponseException(ResponseException.Code.ClientError, "Game is over, no moves can be made");
         }
